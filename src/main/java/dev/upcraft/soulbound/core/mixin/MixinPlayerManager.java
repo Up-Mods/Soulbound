@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,27 +33,25 @@ public class MixinPlayerManager {
     private MinecraftServer server;
 
     @Inject(method = "respawnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;setMainArm(Lnet/minecraft/util/Arm;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void soulbound$respawnPlayer(ServerPlayerEntity oldPlayer, boolean dimensionChange, CallbackInfoReturnable<ServerPlayerEntity> callback, BlockPos blockPos, boolean forcedSpawn, ServerWorld oldWorld, Optional optional, ServerPlayerInteractionManager interactionManager, ServerWorld newWorld, ServerPlayerEntity newPlayer) {
+    private void soulbound$respawnPlayer(ServerPlayerEntity oldPlayer, boolean dimensionChange, CallbackInfoReturnable<ServerPlayerEntity> cir, BlockPos blockPos, float spawnAngle, boolean forcedSpawn, ServerWorld oldWorld, Optional<Vec3d> spawnPosition, ServerPlayerInteractionManager interactionManager, ServerWorld newWorld, ServerPlayerEntity newPlayer) {
         if (dimensionChange)
             return;
 
-        SoulboundPersistentState persistentState = server.getOverworld().getPersistentStateManager().getOrCreate(SoulboundPersistentState::new, "soulbound_persisted_items");
+        SoulboundPersistentState persistentState = SoulboundPersistentState.get(server);
 
         List<SlottedItem> savedItems = persistentState.restorePlayer(oldPlayer);
         if (savedItems == null)
             return;
 
-        SoulboundContainer.CONTAINERS.forEach((id, container) -> {
-            savedItems.stream().filter(item -> item.getContainerId().equals(id)).forEach(item -> {
-                if (newPlayer.getRandom().nextFloat() <= Soulbound.CONFIG.get().getSoulboundRemovalChance()) {
-                    Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(item.getStack());
-                    enchantments.remove(Soulbound.ENCHANT_SOULBOUND);
-                    EnchantmentHelper.set(enchantments, item.getStack());
-                }
+        SoulboundContainer.CONTAINERS.forEach((id, container) -> savedItems.stream().filter(item -> item.containerId().equals(id)).forEach(item -> {
+            if (newPlayer.getRandom().nextFloat() < Soulbound.CONFIG.get().soulboundRemovalChance) {
+                Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(item.stack());
+                enchantments.remove(Soulbound.ENCHANT_SOULBOUND);
+                EnchantmentHelper.set(enchantments, item.stack());
+            }
 
-                container.replaceItem(newPlayer, item);
-            });
-        });
+            container.replaceItem(newPlayer, item);
+        }));
 
         savedItems.clear();
     }

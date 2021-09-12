@@ -31,14 +31,14 @@ public interface SoulboundContainer {
      * @param item The item to be replaced
      */
     default void replaceItem(PlayerEntity player, SlottedItem item) {
-        getContainerStacks(player).set(item.getSlot(), item.getStack());
+        getContainerStacks(player).set(item.slotId(), item.stack());
     }
 
     /**
      * Controls how items in the inventory are removed from the drop list
      *
      * @param player The player who has died
-     * @param slot The slot we have stored
+     * @param slot The slotId we have stored
      */
     default void removeStoredItem(PlayerEntity player, int slot) {
         getContainerStacks(player).set(slot, ItemStack.EMPTY);

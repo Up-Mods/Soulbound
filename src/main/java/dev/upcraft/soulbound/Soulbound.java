@@ -1,55 +1,38 @@
 package dev.upcraft.soulbound;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import dev.upcraft.soulbound.api.SoulboundContainer;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.ConfigHolder;
+import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Range;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.function.Supplier;
 
 public class Soulbound implements ModInitializer {
 
+    public static final String MODID = "soulbound";
     public static final Logger LOGGER = LogManager.getLogger("Soulbound");
     public static final EnchantmentSoulbound ENCHANT_SOULBOUND = new EnchantmentSoulbound();
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    public static final Lazy<Config> CONFIG = new Lazy<>(() -> {
-        File configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "soulbound.json");
-        if (!configFile.exists()) {
-            Config config = new Config();
-            try (FileWriter writer = new FileWriter(configFile)) {
-                writer.write(GSON.toJson(config));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return config;
-        }
-
-        try (FileReader reader = new FileReader(configFile)) {
-            return GSON.fromJson(reader, Config.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new Config();
-        }
-    });
+    public static final Supplier<SoulboundConfig> CONFIG = AutoConfig.getConfigHolder(SoulboundConfig.class)::getConfig;
 
     @Override
     public void onInitialize() {
-        Registry.register(Registry.ENCHANTMENT, new Identifier("soulbound", "soulbound"), ENCHANT_SOULBOUND);
+        AutoConfig.register(SoulboundConfig.class, JanksonConfigSerializer::new);
+        Registry.register(Registry.ENCHANTMENT, new Identifier(MODID, "soulbound"), ENCHANT_SOULBOUND);
 
-        SoulboundContainer.CONTAINERS.put(new Identifier("soulbound", "inv_main"), player -> player.inventory.main);
-        SoulboundContainer.CONTAINERS.put(new Identifier("soulbound", "inv_off"), player -> player.inventory.offHand);
-        SoulboundContainer.CONTAINERS.put(new Identifier("soulbound", "inv_armor"), player -> player.inventory.armor);
-        loadCompat("trinkets", "info.tehnut.soulbound.compat.CompatibilityTrinkets");
+        SoulboundContainer.CONTAINERS.put(new Identifier(MODID, "inv_main"), player -> player.getInventory().main);
+        SoulboundContainer.CONTAINERS.put(new Identifier(MODID, "inv_off"), player -> player.getInventory().offHand);
+        SoulboundContainer.CONTAINERS.put(new Identifier(MODID, "inv_armor"), player -> player.getInventory().armor);
+        loadCompat("trinkets", "dev.upcraft.soulbound.compat.TrinketsIntegration");
     }
 
     private static void loadCompat(String modid, String clazz) {
@@ -61,12 +44,14 @@ public class Soulbound implements ModInitializer {
         }
     }
 
-    public static class Config {
+    @me.shedaniel.autoconfig.annotation.Config(name = Soulbound.MODID)
+    public static class SoulboundConfig implements ConfigData {
 
-        private float soulboundRemovalChance = 0.0F;
+        public float soulboundRemovalChance = 0.0F;
 
-        public float getSoulboundRemovalChance() {
-            return Math.min(1.0F, Math.max(0.0F, soulboundRemovalChance));
+        @Override
+        public void validatePostLoad() throws ValidationException {
+            soulboundRemovalChance = MathHelper.clamp(soulboundRemovalChance, 0.0F, 1.0F);
         }
     }
 }

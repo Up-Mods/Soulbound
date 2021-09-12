@@ -24,7 +24,7 @@ public class MixinPlayerEntity {
         if ( player.getServer() == null)
             return;
 
-        SoulboundPersistentState persistentState =  player.getServer().getOverworld().getPersistentStateManager().getOrCreate(SoulboundPersistentState::new, "soulbound_persisted_items");
+        SoulboundPersistentState persistentState =  SoulboundPersistentState.get(player.getServer());
         List<SlottedItem> soulboundItems = Lists.newArrayList();
         SoulboundContainer.CONTAINERS.forEach((id, container) -> {
             List<ItemStack> inventory = container.getContainerStacks(player);

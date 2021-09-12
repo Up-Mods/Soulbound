@@ -11,14 +11,16 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompatibilityTrinkets implements SoulboundContainer {
+@SuppressWarnings("unused")
+public class TrinketsIntegration implements SoulboundContainer {
 
     static {
-        SoulboundContainer.CONTAINERS.put(new Identifier("trinkets", "trinkets"), new CompatibilityTrinkets());
+        SoulboundContainer.CONTAINERS.put(new Identifier("trinkets", "trinkets"), new TrinketsIntegration());
     }
 
     @Override
     public List<ItemStack> getContainerStacks(PlayerEntity player) {
+        TrinketsApi.getTrinketComponent(player).orElseThrow(() -> new IllegalStateException("player without trinkets component: " + player.getEntityName()));
         Inventory inventory = TrinketsApi.getTrinketsInventory(player);
         List<ItemStack> stacks = new ArrayList<>();
         for (int i = 0; i < inventory.size(); i++)
@@ -28,7 +30,7 @@ public class CompatibilityTrinkets implements SoulboundContainer {
 
     @Override
     public void replaceItem(PlayerEntity player, SlottedItem item) {
-        TrinketsApi.getTrinketsInventory(player).setStack(item.getSlot(), item.getStack());
+        TrinketsApi.getTrinketsInventory(player).setStack(item.slotId(), item.stack());
     }
 
     @Override

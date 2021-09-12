@@ -5,8 +5,10 @@ import com.google.common.collect.Maps;
 import dev.upcraft.soulbound.api.SlottedItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
 
@@ -17,10 +19,15 @@ import java.util.UUID;
 
 public class SoulboundPersistentState extends PersistentState {
 
+    private static final String PERSISTENT_ID = "soulbound_persisted_items";
     private final Map<UUID, List<SlottedItem>> persistedItems = Maps.newHashMap();
 
-    public SoulboundPersistentState() {
-        super("soulbound_persisted_items");
+    public static SoulboundPersistentState get(MinecraftServer server) {
+        return server.getOverworld().getPersistentStateManager().getOrCreate(SoulboundPersistentState::fromNbt, SoulboundPersistentState::new, PERSISTENT_ID);
+    }
+
+    private SoulboundPersistentState() {
+        super();
     }
 
     public void storePlayer(PlayerEntity player, List<SlottedItem> items) {
@@ -35,36 +42,38 @@ public class SoulboundPersistentState extends PersistentState {
         return items;
     }
 
-    @Override
-    public void fromTag(CompoundTag tag) {
-        tag.getList("playerTags", 10).forEach(playerTag -> {
-            CompoundTag playerCompound = (CompoundTag) playerTag;
-            UUID uuid = playerCompound.getUuid("uuid");
-            ListTag items = playerCompound.getList("items", 10);
+    private static SoulboundPersistentState fromNbt(NbtCompound tag) {
+        SoulboundPersistentState value = new SoulboundPersistentState();
+        NbtList playerTags = tag.getList("playerTags", NbtElement.COMPOUND_TYPE);
+        for (int j = 0; j < playerTags.size(); j++) {
+            NbtCompound playerTag = playerTags.getCompound(j);
+            UUID uuid = playerTag.getUuid("uuid");
+            NbtList items = playerTag.getList("items", NbtElement.COMPOUND_TYPE);
             List<SlottedItem> slotted = Lists.newArrayList();
-            items.forEach(itemTag -> {
-                CompoundTag itemCompound = (CompoundTag) itemTag;
-                Identifier id = new Identifier(itemCompound.getString("id"));
-                ItemStack stack = ItemStack.fromTag(itemCompound.getCompound("stack"));
-                int slot = itemCompound.getInt("slot");
+            for (int i = 0; i < items.size(); i++) {
+                NbtCompound item = items.getCompound(i);
+                Identifier id = new Identifier(item.getString("id"));
+                ItemStack stack = ItemStack.fromNbt(item.getCompound("stack"));
+                int slot = item.getInt("slotId");
                 slotted.add(new SlottedItem(id, stack, slot));
-            });
-            persistedItems.put(uuid, slotted);
-        });
+            }
+            value.persistedItems.put(uuid, slotted);
+        }
+        return value;
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
-        ListTag playerTags = new ListTag();
+    public NbtCompound writeNbt(NbtCompound tag) {
+        NbtList playerTags = new NbtList();
         persistedItems.forEach((uuid, items) -> {
-            CompoundTag playerTag = new CompoundTag();
+            NbtCompound playerTag = new NbtCompound();
             playerTag.putUuid("uuid", uuid);
-            ListTag itemsList = new ListTag();
+            NbtList itemsList = new NbtList();
             items.forEach(slotted -> {
-                CompoundTag itemTag = new CompoundTag();
-                itemTag.putString("id", slotted.getContainerId().toString());
-                itemTag.put("stack", slotted.getStack().toTag(new CompoundTag()));
-                itemTag.putInt("slot", slotted.getSlot());
+                NbtCompound itemTag = new NbtCompound();
+                itemTag.putString("id", slotted.containerId().toString());
+                itemTag.put("stack", slotted.stack().writeNbt(new NbtCompound()));
+                itemTag.putInt("slotId", slotted.slotId());
                 itemsList.add(itemTag);
             });
             playerTag.put("items", itemsList);

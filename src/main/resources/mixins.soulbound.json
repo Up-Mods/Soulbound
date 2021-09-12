@@ -1,8 +1,8 @@
 {
   "required": true,
-  "package": "info.tehnut.soulbound.core.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "refmap": "soulbound-refmap.json",
+  "minVersion": "0.8",
+  "package": "dev.upcraft.soulbound.core.mixin",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MixinPlayerEntity",
     "MixinPlayerManager"
