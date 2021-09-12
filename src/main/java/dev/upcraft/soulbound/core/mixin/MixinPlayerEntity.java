@@ -1,49 +1,65 @@
 package dev.upcraft.soulbound.core.mixin;
 
-import com.google.common.collect.Lists;
-import dev.upcraft.soulbound.api.SlottedItem;
 import dev.upcraft.soulbound.Soulbound;
-import dev.upcraft.soulbound.api.SoulboundContainer;
+import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
+import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
+import dev.upcraft.soulbound.core.SoulboundHooks;
 import dev.upcraft.soulbound.core.SoulboundPersistentState;
-import net.minecraft.enchantment.EnchantmentHelper;
+import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainer;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
+import java.util.function.UnaryOperator;
 
 @Mixin(value = PlayerEntity.class, priority = 6969)
-public class MixinPlayerEntity {
+@Implements(@Interface(iface = PlayerInventoryContainer.class, prefix = "sb$"))
+public abstract class MixinPlayerEntity extends LivingEntity {
+
+    @Shadow public abstract PlayerInventory getInventory();
+
+    private MixinPlayerEntity(EntityType<? extends LivingEntity> entityType, World world) {
+        super(entityType, world);
+        throw new UnsupportedOperationException("mixin not transformed");
+    }
 
     @Inject(method = "dropInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;dropAll()V"))
-    private void soulbound$dropInventory(CallbackInfo callbackInfo) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if ( player.getServer() == null)
-            return;
+    private void soulbound_dropInventory(CallbackInfo callbackInfo) {
+        if(this.getServer() != null && !SoulboundHooks.isFakePlayer((PlayerEntity) (Object) this)) {
+            SoulboundPersistentState persistentState = SoulboundPersistentState.get(this.getServer());
+            persistentState.storePlayer((PlayerEntity) (Object) this);
+        }
+    }
 
-        SoulboundPersistentState persistentState =  SoulboundPersistentState.get(player.getServer());
-        List<SlottedItem> soulboundItems = Lists.newArrayList();
-        SoulboundContainer.CONTAINERS.forEach((id, container) -> {
-            List<ItemStack> inventory = container.getContainerStacks(player);
-            if (inventory == null)
-                return;
+    public SoulboundContainerProvider<? extends SoulboundContainer> sb$getProvider() {
+        return Soulbound.PLAYER_CONTAINER_PROVIDER;
+    }
 
-            for (int i = 0; i < inventory.size(); i++) {
-                ItemStack stack = inventory.get(i);
-                if (stack.isEmpty())
-                    continue;
+    public LivingEntity sb$getEntity() {
+        return this;
+    }
 
-                int soulboundLevel = EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack);
-                if (soulboundLevel > 0) {
-                    soulboundItems.add(new SlottedItem(id, stack, i));
-                    container.removeStoredItem(player, i);
-                }
-            }
-        });
+    public void sb$storeToNbt(NbtCompound nbt) {
+        nbt.put("main", SoulboundHooks.getFilteredItemList(this.getInventory().main));
+        nbt.put("off_hand", SoulboundHooks.getFilteredItemList(this.getInventory().offHand));
+        nbt.put("armor", SoulboundHooks.getFilteredItemList(this.getInventory().armor));
+    }
 
-        persistentState.storePlayer(player, soulboundItems);
+    public void sb$restoreFromNbt(NbtCompound nbt, UnaryOperator<ItemStack> itemProcessor) {
+        SoulboundHooks.processPlayerDrops((PlayerEntity)(Object) this, this.getInventory().main, SoulboundHooks.readItemList(nbt.getList("main", NbtElement.COMPOUND_TYPE)), itemProcessor);
+        SoulboundHooks.processPlayerDrops((PlayerEntity)(Object) this, this.getInventory().offHand, SoulboundHooks.readItemList(nbt.getList("off_hand", NbtElement.COMPOUND_TYPE)), itemProcessor);
+        SoulboundHooks.processPlayerDrops((PlayerEntity)(Object) this, this.getInventory().armor, SoulboundHooks.readItemList(nbt.getList("armor", NbtElement.COMPOUND_TYPE)), itemProcessor);
     }
 }
