@@ -1,111 +1,169 @@
-plugins {
-    id "com.matthewprenger.cursegradle" version "1.4.0"
-    id 'fabric-loom' version '0.4-SNAPSHOT'
-    id "maven-publish"
-}
+import com.modrinth.minotaur.TaskModrinthUpload
+import net.fabricmc.loom.task.RemapJarTask
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+plugins {
+    id 'fabric-loom' version '0.9.+'
+    id "maven-publish"
+    id "com.modrinth.minotaur" version "1.1.0"
+}
 
 def build_number = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : 'CUSTOM'
 
-group = package_group
-archivesBaseName = "${mod_name}-fabric"
-version = "${mc_version}-${mod_version}-${build_number}"
+def ENV = System.getenv()
+def buildTime = ENV.BUILD_TIME ?: new Date().format('yyyyMMddHHmmss')
 
-minecraft {
-    refmapName = mod_name.toLowerCase() + '-refmap.json'
+group = "dev.upcraft"
+archivesBaseName = "Soulbound"
+
+boolean isPreviewBuild = !ENV.TAG || ENV.TAG.matches(".+-.+")
+def buildNumber = !ENV.TAG ? ("${ENV.BUILD_NUMBER ? "build.${ENV.BUILD_NUMBER}" : buildTime}-${project.minecraft_version}") : ""
+version = (ENV.TAG ?: "development") + ((isPreviewBuild && !ENV.TAG) ? "+${buildNumber}" : "")
+
+loom {
+
+}
+
+java {
+    withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
 }
 
 repositories {
-    maven { url = "https://maven.abusedmaster.xyz/" }
-    maven { url = "https://jitpack.io" }
+    maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/releases"
+	}
+	maven {
+		name = "Ladysnake Libs"
+		url = "https://ladysnake.jfrog.io/artifactory/mods"
+	}
+    maven {
+        url = "https://maven.shedaniel.me"
+    }
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${mc_version}"
-    mappings "net.fabricmc:yarn:${mc_version}+build.${mappings_version}:v2"
-    modCompile "net.fabricmc:fabric-loader:${loader_version}"
-    modCompile "net.fabricmc.fabric-api:fabric-api:${api_version}"
-    modCompile "com.github.emilyploszaj:trinkets:v${trinkets_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    compileOnly "org.jetbrains:annotations:22.0.0"
+    modApi "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation(include("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}")) {
+        exclude group: 'net.fabricmc.fabric-api'
+    }
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    classifier = 'sources'
+task apiJar(type: Jar, dependsOn: classes) {
+    from(sourceSets.main.output) {
+        include String.valueOf(findProperty("api_package")).replace('.', '/') + "/**"
+    }
+    from("LICENSE.md") {
+        rename { "LICENSE_${archiveBaseName.get()}-${archiveAppendix.get()}" }
+    }
+    includeEmptyDirs false
+    manifest.mainAttributes(
+            "Implementation-Title": project.archivesBaseName + "-API",
+            "Implementation-Version": project.version,
+            "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}:api".toLowerCase(Locale.ROOT),
+            "Built-On-Minecraft": project.minecraft_version,
+            "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
+    )
+    archiveClassifier.set("api-dev")
 }
 
-task apiJar(type: Jar) {
-    from sourceSets.main.allSource
-    from sourceSets.main.output
-    include 'info/tehnut/soulbound/api/**/*'
-    classifier = 'api'
+task remapApiJar(type: RemapJarTask, dependsOn: apiJar) {
+    input.set(apiJar.archiveFile.get())
+    addNestedDependencies.set(false)
+    archiveClassifier.set("api")
+}
+
+jar {
+    from("LICENSE.md") {
+        rename { "LICENSE_${archiveBaseName.get()}" }
+    }
+
+    manifest.mainAttributes(
+            "Implementation-Title": project.archivesBaseName,
+            "Implementation-Version": project.version,
+            "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}".toLowerCase(Locale.ROOT),
+            "Built-On-Minecraft": project.minecraft_version,
+            "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
+    )
+}
+
+tasks.withType(JavaCompile).configureEach {
+	// ensure that the encoding is set to UTF-8, no matter what the system default is
+	// this fixes some edge cases with special characters not displaying correctly
+	// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+	// If Javadoc is generated, this must be specified in that task too.
+	it.options.encoding = "UTF-8"
+}
+
+processResources {
+    // this will ensure that this task is redone when there's a change
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        // add mod metadata
+        expand "version": project.version
+    }
+}
+
+artifacts {
+    archives(remapJar)
+    archives(apiJar) {
+        builtBy remapApiJar
+    }
+    archives(sourcesJar) {
+        builtBy remapSourcesJar
+    }
 }
 
 publishing {
-    tasks.publish.dependsOn 'build'
     publications {
         mavenJava(MavenPublication) {
             artifact remapJar
-            artifact sourcesJar
-            artifact apiJar
-        }
-    }
-    repositories {
-        if (project.hasProperty('maven_repo')) {
-            maven { url maven_repo }
-        } else {
-            mavenLocal()
-        }
-    }
-}
-
-curseforge {
-    if (project.hasProperty('curse_key_TehNut'))
-        apiKey = project.curse_key_TehNut
-
-    project {
-        id = "${curse_id}"
-        changelog = getChangelogText()
-        releaseType = 'release'
-        
-        addGameVersion "1.16.1"
-        addGameVersion "Java 8"
-        addArtifact sourcesJar
-        addArtifact apiJar
-        mainArtifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
-        
-        afterEvaluate {
-            uploadTask.dependsOn(remapJar)
-        }
-    }
-    
-    options {
-        forgeGradleIntegration = false
-    }
-}
-
-String getChangelogText() {
-    def changelogFile = new File('changelog.txt')
-    String str = ''
-    String separator = '---'
-    int lineCount = 0
-    boolean done = false
-    changelogFile.eachLine {
-        if (done || it == null) {
-            return
-        }
-        if (lineCount < 3) {
-            lineCount++
-            if (it.startsWith(separator)) {
-                return
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+            artifact(apiJar) {
+                builtBy remapApiJar
             }
         }
-        if (!it.startsWith(separator)) {
-            str += "$it" + (lineCount < 3 ? ':\n\n' : '\n')
-            return
-        }
-        done = true // once we go past the first version block, parse no more
     }
-    return str
+
+    repositories {
+        if (ENV.MAVEN_UPLOAD_URL) {
+            maven {
+                url = ENV.MAVEN_UPLOAD_URL
+                credentials {
+                    username = ENV.MAVEN_UPLOAD_USER
+                    password = ENV.MAVEN_UPLOAD_PASSWORD
+                }
+            }
+        }
+    }
+}
+
+task publishToModrinth(type: TaskModrinthUpload, dependsOn: assemble) {
+    if (ENV.MODRINTH_TOKEN) {
+        token = ENV.MODRINTH_TOKEN
+    }
+    projectId = project.modrinth_id
+    uploadFile = remapJar
+    versionNumber = ENV.TAG ?: version
+    versionName = versionNumber // need this here because the Modrinth API doesn't do that by default
+    releaseType = isPreviewBuild ? ((ENV.TAG && ENV.TAG.contains("-beta")) ? "beta" : "alpha") : "release"
+    "${project.modrinth_game_versions}".split(",").each {
+        addGameVersion(it)
+    }
+    addLoader("fabric")
+}
+
+if (ENV.MODRINTH_TOKEN) {
+    tasks.publish.dependsOn(publishToModrinth)
 }

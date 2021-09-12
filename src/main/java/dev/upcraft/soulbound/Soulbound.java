@@ -1,8 +1,8 @@
-package info.tehnut.soulbound;
+package dev.upcraft.soulbound;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import info.tehnut.soulbound.api.SoulboundContainer;
+import dev.upcraft.soulbound.api.SoulboundContainer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;

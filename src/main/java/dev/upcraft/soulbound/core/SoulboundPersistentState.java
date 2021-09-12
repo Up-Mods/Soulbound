@@ -1,8 +1,8 @@
-package info.tehnut.soulbound.core;
+package dev.upcraft.soulbound.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import info.tehnut.soulbound.api.SlottedItem;
+import dev.upcraft.soulbound.api.SlottedItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;

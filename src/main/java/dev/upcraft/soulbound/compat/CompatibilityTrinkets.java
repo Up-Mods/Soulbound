@@ -1,8 +1,8 @@
-package info.tehnut.soulbound.compat;
+package dev.upcraft.soulbound.compat;
 
 import dev.emi.trinkets.api.TrinketsApi;
-import info.tehnut.soulbound.api.SlottedItem;
-import info.tehnut.soulbound.api.SoulboundContainer;
+import dev.upcraft.soulbound.api.SlottedItem;
+import dev.upcraft.soulbound.api.SoulboundContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;

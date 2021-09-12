@@ -1,4 +1,4 @@
-package info.tehnut.soulbound;
+package dev.upcraft.soulbound;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;

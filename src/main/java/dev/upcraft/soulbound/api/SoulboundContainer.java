@@ -1,4 +1,4 @@
-package info.tehnut.soulbound.api;
+package dev.upcraft.soulbound.api;
 
 import com.google.common.collect.Maps;
 import net.minecraft.entity.player.PlayerEntity;

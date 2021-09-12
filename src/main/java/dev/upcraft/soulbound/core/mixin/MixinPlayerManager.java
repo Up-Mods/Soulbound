@@ -1,19 +1,17 @@
-package info.tehnut.soulbound.core.mixin;
+package dev.upcraft.soulbound.core.mixin;
 
-import info.tehnut.soulbound.api.SlottedItem;
-import info.tehnut.soulbound.Soulbound;
-import info.tehnut.soulbound.api.SoulboundContainer;
-import info.tehnut.soulbound.core.SoulboundPersistentState;
+import dev.upcraft.soulbound.api.SlottedItem;
+import dev.upcraft.soulbound.Soulbound;
+import dev.upcraft.soulbound.api.SoulboundContainer;
+import dev.upcraft.soulbound.core.SoulboundPersistentState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

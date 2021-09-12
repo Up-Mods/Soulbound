@@ -1,28 +1,36 @@
 {
   "schemaVersion": 1,
   "id": "soulbound",
-  "version": "1.0.1",
-
+  "version": "${version}",
   "name": "Soulbound",
   "description": "An enchantment that will be retain items upon death",
   "authors": [
+    {
+      "name": "UpcraftLP",
+      "contact": {
+        "github": "UpcraftLP",
+        "homepage": "https://upcraft.dev",
+        "twitter": "@UpcraftLP"
+      }
+    },
     "TehNut"
   ],
   "contributors": [],
-
   "license": "MIT",
   "icon": "assets/soulbound/logo.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
-      "info.tehnut.soulbound.Soulbound"
+      "dev.upcraft.soulbound.Soulbound"
     ]
   },
   "mixins": [
-    "soulbound.common.json"
+    "mixins.soulbound.json"
   ],
   "requires": {
-    "fabricloader": "=>0.4.0"
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "fabricloader": ">=0.11",
+    "java": ">=16"
   }
 }
