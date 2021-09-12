@@ -81,6 +81,7 @@ task remapApiJar(type: RemapJarTask, dependsOn: apiJar) {
     addNestedDependencies.set(false)
     archiveClassifier.set("api")
 }
+tasks.assemble.dependsOn(remapApiJar)
 
 jar {
     from("LICENSE.md") {
