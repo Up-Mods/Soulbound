@@ -26,35 +26,6 @@ public class SoulboundPersistentState extends PersistentState {
         return server.getOverworld().getPersistentStateManager().getOrCreate(SoulboundPersistentState::fromNbt, SoulboundPersistentState::new, PERSISTENT_ID);
     }
 
-    private SoulboundPersistentState() {
-        super();
-    }
-
-    public void storePlayer(PlayerEntity player) {
-        Map<Identifier, NbtCompound> data = new HashMap<>();
-        Soulbound.CONTAINERS.getIds().forEach(id -> {
-            SoulboundContainerProvider<?> provider = Objects.requireNonNull(Soulbound.CONTAINERS.get(id));
-            SoulboundContainer container = provider.getContainer(player);
-            if(container != null) {
-                NbtCompound containerData = new NbtCompound();
-                container.storeToNbt(containerData);
-                if(!containerData.isEmpty()) {
-                    data.put(id, containerData);
-                }
-            }
-        });
-        this.persistedData.put(player.getGameProfile().getId(), data);
-        markDirty();
-    }
-
-    public Map<Identifier, NbtCompound> restorePlayer(PlayerEntity player) {
-        Map<Identifier, NbtCompound> value = persistedData.remove(player.getGameProfile().getId());
-        if(value != null) {
-            markDirty();
-        }
-        return value;
-    }
-
     private static SoulboundPersistentState fromNbt(NbtCompound tag) {
         SoulboundPersistentState value = new SoulboundPersistentState();
         NbtList playerTags = tag.getList("players", NbtElement.COMPOUND_TYPE);
@@ -66,14 +37,42 @@ public class SoulboundPersistentState extends PersistentState {
             for (int i = 0; i < inventories.size(); i++) {
                 NbtCompound inv = inventories.getCompound(i);
                 Identifier id = new Identifier(inv.getString("id"));
-                if(Soulbound.CONTAINERS.containsId(id)) {
+                if (Soulbound.CONTAINERS.containsId(id)) {
                     map.put(id, inv.getCompound("data"));
-                }
-                else {
+                } else {
                     Soulbound.LOGGER.error("unable to read data for unknown provider {} for player {}", id, uuid);
                 }
             }
             value.persistedData.put(uuid, map);
+        }
+        return value;
+    }
+
+    private SoulboundPersistentState() {
+        super();
+    }
+
+    public void storePlayer(PlayerEntity player) {
+        Map<Identifier, NbtCompound> data = new HashMap<>();
+        Soulbound.CONTAINERS.getIds().forEach(id -> {
+            SoulboundContainerProvider<?> provider = Objects.requireNonNull(Soulbound.CONTAINERS.get(id));
+            SoulboundContainer container = provider.getContainer(player);
+            if (container != null) {
+                NbtCompound containerData = new NbtCompound();
+                container.storeToNbt(containerData);
+                if (!containerData.isEmpty()) {
+                    data.put(id, containerData);
+                }
+            }
+        });
+        this.persistedData.put(player.getGameProfile().getId(), data);
+        markDirty();
+    }
+
+    public Map<Identifier, NbtCompound> restorePlayer(PlayerEntity player) {
+        Map<Identifier, NbtCompound> value = persistedData.remove(player.getGameProfile().getId());
+        if (value != null) {
+            markDirty();
         }
         return value;
     }

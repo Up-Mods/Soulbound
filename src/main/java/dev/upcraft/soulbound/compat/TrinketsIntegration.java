@@ -21,6 +21,23 @@ import java.util.function.UnaryOperator;
 @SuppressWarnings("unused") // called by reflection
 public class TrinketsIntegration {
 
+    static {
+        register();
+    }
+
+    private static void register() {
+        TrinketDropCallback.EVENT.register((rule, stack, ref, entity) -> {
+            if (SoulboundHooks.shouldKeepStack(stack, entity.getRandom())) {
+                @Nullable SoulboundContainer container = DUMMY_PROVIDER.getContainer(entity);
+                if (container != null && !SoulboundHooks.createItemProcessor(container).apply(stack).isEmpty()) {
+                    return TrinketEnums.DropRule.KEEP;
+                }
+            }
+            return TrinketEnums.DropRule.DEFAULT;
+        });
+        Registry.register(SoulboundApi.CONTAINERS, new Identifier(Soulbound.MODID, "trinkets_integration"), DUMMY_PROVIDER);
+    }
+
     public static final SoulboundContainerProvider<SoulboundContainer> DUMMY_PROVIDER = entity -> {
         TrinketComponent component = TrinketsApi.getTrinketComponent(entity).orElse(null);
         return component != null ? new SoulboundContainer() {
@@ -46,20 +63,5 @@ public class TrinketsIntegration {
         } : null;
     };
 
-    private static void register() {
-        TrinketDropCallback.EVENT.register((rule, stack, ref, entity) -> {
-            if (SoulboundHooks.shouldKeepStack(stack, entity.getRandom())) {
-                @Nullable SoulboundContainer container = DUMMY_PROVIDER.getContainer(entity);
-                if (container != null && !SoulboundHooks.createItemProcessor(container).apply(stack).isEmpty()) {
-                    return TrinketEnums.DropRule.KEEP;
-                }
-            }
-            return TrinketEnums.DropRule.DEFAULT;
-        });
-        Registry.register(SoulboundApi.CONTAINERS, new Identifier(Soulbound.MODID, "trinkets_integration"), DUMMY_PROVIDER);
-    }
 
-    static {
-        register();
-    }
 }

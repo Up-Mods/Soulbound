@@ -7,8 +7,6 @@ plugins {
     id "com.modrinth.minotaur" version "1.1.0"
 }
 
-def build_number = System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER') : 'CUSTOM'
-
 def ENV = System.getenv()
 def buildTime = ENV.BUILD_TIME ?: new Date().format('yyyyMMddHHmmss')
 

@@ -32,15 +32,14 @@ public class SoulboundHooks {
         Random random = container.getEntity().getRandom();
         return stack -> {
             SoulboundItemCallback.Context ctx = new SoulboundItemCallback.Context(container, stack, Soulbound.CONFIG.get().soulboundPreservationRate);
-            if(SoulboundItemCallback.EVENT.invoker().apply(ctx) != TriState.FALSE) {
+            if (SoulboundItemCallback.EVENT.invoker().apply(ctx) != TriState.FALSE) {
                 ItemStack itemStack = ctx.getStack();
                 if (ctx.getLevelPreservationChance() <= random.nextDouble()) {
                     var map = EnchantmentHelper.get(itemStack);
                     int newLevel = map.getOrDefault(Soulbound.ENCHANT_SOULBOUND, 0) - 1;
-                    if(newLevel > 0) {
+                    if (newLevel > 0) {
                         map.put(Soulbound.ENCHANT_SOULBOUND, newLevel);
-                    }
-                    else {
+                    } else {
                         map.remove(Soulbound.ENCHANT_SOULBOUND);
                     }
                     EnchantmentHelper.set(map, itemStack);
@@ -61,10 +60,6 @@ public class SoulboundHooks {
         }
     }
 
-    public static boolean shouldKeepStack(ItemStack stack, Random random) {
-        return EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0 && Soulbound.CONFIG.get().soulboundDropChance <= random.nextDouble();
-    }
-
     public static NbtList getFilteredItemList(DefaultedList<ItemStack> items, Random random) {
         NbtList list = new NbtList();
         for (int i = 0; i < items.size(); i++) {
@@ -80,6 +75,10 @@ public class SoulboundHooks {
         return list;
     }
 
+    public static boolean shouldKeepStack(ItemStack stack, Random random) {
+        return EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0 && Soulbound.CONFIG.get().soulboundDropChance <= random.nextDouble();
+    }
+
     public static Int2ObjectMap<ItemStack> readItemList(NbtList list) {
         Int2ObjectMap<ItemStack> value = new Int2ObjectOpenHashMap<>();
         for (int i = 0; i < list.size(); i++) {
@@ -88,6 +87,27 @@ public class SoulboundHooks {
             value.put(tag.getInt("slot"), stack);
         }
         return value;
+    }
+
+    public static void processPlayerDrops(PlayerEntity player, DefaultedList<ItemStack> targetInv, Int2ObjectMap<ItemStack> items, UnaryOperator<ItemStack> itemProcessor) {
+        items.int2ObjectEntrySet().forEach(e -> {
+            ItemStack stack = itemProcessor.apply(e.getValue().copy());
+            if (stack.isEmpty()) {
+                ItemStack drop = e.getValue();
+                drop.setCount(1);
+                ItemEntity itemEntity = player.dropItem(drop, false);
+                if (itemEntity != null) {
+                    itemEntity.setDespawnImmediately();
+                }
+            } else {
+                int slot = e.getIntKey();
+                if (slot > 0 && slot < targetInv.size() && targetInv.get(slot).isEmpty()) {
+                    targetInv.set(slot, stack);
+                } else {
+                    addItemToPlayer(player, stack);
+                }
+            }
+        });
     }
 
     public static void addItemToPlayer(PlayerEntity player, ItemStack stack) {
@@ -109,28 +129,6 @@ public class SoulboundHooks {
                 itemEntity.setOwner(player.getUuid());
             }
         }
-    }
-
-    public static void processPlayerDrops(PlayerEntity player, DefaultedList<ItemStack> targetInv, Int2ObjectMap<ItemStack> items, UnaryOperator<ItemStack> itemProcessor) {
-        items.int2ObjectEntrySet().forEach(e -> {
-            ItemStack stack = itemProcessor.apply(e.getValue().copy());
-            if(stack.isEmpty()) {
-                ItemStack drop = e.getValue();
-                drop.setCount(1);
-                ItemEntity itemEntity = player.dropItem(drop, false);
-                if (itemEntity != null) {
-                    itemEntity.setDespawnImmediately();
-                }
-            }
-            else {
-                int slot = e.getIntKey();
-                if (slot > 0 && slot < targetInv.size() && targetInv.get(slot).isEmpty()) {
-                    targetInv.set(slot, stack);
-                } else {
-                    addItemToPlayer(player, stack);
-                }
-            }
-        });
     }
 
 }

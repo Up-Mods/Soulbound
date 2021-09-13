@@ -29,8 +29,6 @@ import java.util.function.UnaryOperator;
 @Implements(@Interface(iface = PlayerInventoryContainer.class, prefix = "sb$"))
 public abstract class MixinPlayerEntity extends LivingEntity {
 
-    @Shadow public abstract PlayerInventory getInventory();
-
     private MixinPlayerEntity(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
         throw new UnsupportedOperationException("mixin not transformed");
@@ -39,7 +37,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
     @Inject(method = "dropInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;dropAll()V"))
     private void soulbound_dropInventory(CallbackInfo callbackInfo) {
         //noinspection ConstantConditions
-        if((Object) this instanceof ServerPlayerEntity && SoulboundHooks.isRealPlayer((ServerPlayerEntity) (Object) this)) {
+        if ((Object) this instanceof ServerPlayerEntity && SoulboundHooks.isRealPlayer((ServerPlayerEntity) (Object) this)) {
             SoulboundPersistentState persistentState = SoulboundPersistentState.get(this.getServer());
             persistentState.storePlayer((PlayerEntity) (Object) this);
         }
@@ -59,9 +57,12 @@ public abstract class MixinPlayerEntity extends LivingEntity {
         nbt.put("armor", SoulboundHooks.getFilteredItemList(this.getInventory().armor, this.getRandom()));
     }
 
+    @Shadow
+    public abstract PlayerInventory getInventory();
+
     public void sb$restoreFromNbt(NbtCompound nbt, UnaryOperator<ItemStack> itemProcessor) {
-        SoulboundHooks.processPlayerDrops((PlayerEntity)(Object) this, this.getInventory().main, SoulboundHooks.readItemList(nbt.getList("main", NbtElement.COMPOUND_TYPE)), itemProcessor);
-        SoulboundHooks.processPlayerDrops((PlayerEntity)(Object) this, this.getInventory().offHand, SoulboundHooks.readItemList(nbt.getList("off_hand", NbtElement.COMPOUND_TYPE)), itemProcessor);
-        SoulboundHooks.processPlayerDrops((PlayerEntity)(Object) this, this.getInventory().armor, SoulboundHooks.readItemList(nbt.getList("armor", NbtElement.COMPOUND_TYPE)), itemProcessor);
+        SoulboundHooks.processPlayerDrops((PlayerEntity) (Object) this, this.getInventory().main, SoulboundHooks.readItemList(nbt.getList("main", NbtElement.COMPOUND_TYPE)), itemProcessor);
+        SoulboundHooks.processPlayerDrops((PlayerEntity) (Object) this, this.getInventory().offHand, SoulboundHooks.readItemList(nbt.getList("off_hand", NbtElement.COMPOUND_TYPE)), itemProcessor);
+        SoulboundHooks.processPlayerDrops((PlayerEntity) (Object) this, this.getInventory().armor, SoulboundHooks.readItemList(nbt.getList("armor", NbtElement.COMPOUND_TYPE)), itemProcessor);
     }
 }

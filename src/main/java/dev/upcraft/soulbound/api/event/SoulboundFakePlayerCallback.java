@@ -10,7 +10,7 @@ public interface SoulboundFakePlayerCallback extends Predicate<ServerPlayerEntit
 
     Event<SoulboundFakePlayerCallback> EVENT = EventFactory.createArrayBacked(SoulboundFakePlayerCallback.class, listeners -> player -> {
         for (SoulboundFakePlayerCallback listener : listeners) {
-            if(!listener.test(player)) {
+            if (!listener.test(player)) {
                 return false;
             }
         }

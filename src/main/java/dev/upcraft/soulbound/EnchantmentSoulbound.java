@@ -14,6 +14,11 @@ public class EnchantmentSoulbound extends Enchantment {
     }
 
     @Override
+    public int getMaxLevel() {
+        return 1;
+    }
+
+    @Override
     public int getMinPower(int level) {
         return 15;
     }
@@ -21,11 +26,6 @@ public class EnchantmentSoulbound extends Enchantment {
     @Override
     public int getMaxPower(int level) {
         return super.getMinPower(level) + 50;
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 1;
     }
 
     @Override

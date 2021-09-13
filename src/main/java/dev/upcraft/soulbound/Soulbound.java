@@ -52,7 +52,7 @@ public class Soulbound implements ModInitializer {
         Registry.register(CONTAINERS, new Identifier(MODID, "player_inventory"), PLAYER_CONTAINER_PROVIDER);
         SoulboundHooks.loadCompat("trinkets", "dev.upcraft.soulbound.compat.TrinketsIntegration");
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
-            if(!alive) {
+            if (!alive) {
                 SoulboundPersistentState persistentState = SoulboundPersistentState.get(newPlayer.getServer());
                 Map<Identifier, NbtCompound> saveData = persistentState.restorePlayer(oldPlayer);
                 if (saveData != null) {

@@ -11,7 +11,7 @@ public interface SoulboundItemCallback {
     Event<SoulboundItemCallback> EVENT = EventFactory.createArrayBacked(SoulboundItemCallback.class, callbacks -> ctx -> {
         for (SoulboundItemCallback callback : callbacks) {
             TriState value = callback.apply(ctx);
-            if(value != TriState.DEFAULT) {
+            if (value != TriState.DEFAULT) {
                 return value;
             }
         }
