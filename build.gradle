@@ -130,9 +130,7 @@ publishing {
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
             }
-            artifact(apiJar) {
-                builtBy remapApiJar
-            }
+            artifact(remapApiJar)
         }
     }
 
