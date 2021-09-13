@@ -115,9 +115,7 @@ processResources {
 
 artifacts {
     archives(remapJar)
-    archives(apiJar) {
-        builtBy remapApiJar
-    }
+    archives(remapApiJar)
     archives(sourcesJar) {
         builtBy remapSourcesJar
     }
