@@ -1,10 +1,12 @@
 package dev.upcraft.soulbound.core;
 
 import dev.upcraft.soulbound.Soulbound;
+import dev.upcraft.soulbound.api.event.SoulboundFakePlayerCallback;
 import dev.upcraft.soulbound.api.event.SoulboundItemCallback;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.ItemEntity;
@@ -12,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.collection.DefaultedList;
@@ -21,20 +24,30 @@ import java.util.function.UnaryOperator;
 
 public class SoulboundHooks {
 
-    public static boolean isFakePlayer(PlayerEntity player) {
-        return false;
+    public static boolean isRealPlayer(ServerPlayerEntity player) {
+        return SoulboundFakePlayerCallback.EVENT.invoker().test(player);
     }
 
     public static UnaryOperator<ItemStack> createItemProcessor(SoulboundContainer container) {
         Random random = container.getEntity().getRandom();
-        float chance = Soulbound.CONFIG.get().soulboundRemovalChance;
         return stack -> {
-            SoulboundItemCallback.Context ctx = new SoulboundItemCallback.Context(container, stack, chance);
-            return switch (SoulboundItemCallback.EVENT.invoker().apply(ctx)) {
-                case FALSE -> ItemStack.EMPTY;
-                case TRUE -> ctx.getStack();
-                default -> random.nextFloat() < ctx.getChance() ? ctx.getStack() : ItemStack.EMPTY;
-            };
+            SoulboundItemCallback.Context ctx = new SoulboundItemCallback.Context(container, stack, Soulbound.CONFIG.get().soulboundPreservationRate);
+            if(SoulboundItemCallback.EVENT.invoker().apply(ctx) != TriState.FALSE) {
+                ItemStack itemStack = ctx.getStack();
+                if (ctx.getLevelPreservationChance() <= random.nextDouble()) {
+                    var map = EnchantmentHelper.get(itemStack);
+                    int newLevel = map.getOrDefault(Soulbound.ENCHANT_SOULBOUND, 0) - 1;
+                    if(newLevel > 0) {
+                        map.put(Soulbound.ENCHANT_SOULBOUND, newLevel);
+                    }
+                    else {
+                        map.remove(Soulbound.ENCHANT_SOULBOUND);
+                    }
+                    EnchantmentHelper.set(map, itemStack);
+                }
+                return itemStack;
+            }
+            return ItemStack.EMPTY;
         };
     }
 
@@ -48,15 +61,20 @@ public class SoulboundHooks {
         }
     }
 
-    public static NbtList getFilteredItemList(DefaultedList<ItemStack> items) {
+    public static boolean shouldKeepStack(ItemStack stack, Random random) {
+        return EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0 && Soulbound.CONFIG.get().soulboundDropChance <= random.nextDouble();
+    }
+
+    public static NbtList getFilteredItemList(DefaultedList<ItemStack> items, Random random) {
         NbtList list = new NbtList();
         for (int i = 0; i < items.size(); i++) {
             ItemStack stack = items.get(i);
-            if (EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0) {
+            if (shouldKeepStack(stack, random)) {
                 NbtCompound tag = new NbtCompound();
                 tag.put("item", stack.writeNbt(new NbtCompound()));
                 tag.putInt("slot", i);
                 list.add(tag);
+                items.set(i, ItemStack.EMPTY);
             }
         }
         return list;

@@ -9,7 +9,6 @@ import dev.upcraft.soulbound.api.SoulboundApi;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
 import dev.upcraft.soulbound.core.SoulboundHooks;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -49,7 +48,7 @@ public class TrinketsIntegration {
 
     private static void register() {
         TrinketDropCallback.EVENT.register((rule, stack, ref, entity) -> {
-            if (EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0) {
+            if (SoulboundHooks.shouldKeepStack(stack, entity.getRandom())) {
                 @Nullable SoulboundContainer container = DUMMY_PROVIDER.getContainer(entity);
                 if (container != null && !SoulboundHooks.createItemProcessor(container).apply(stack).isEmpty()) {
                     return TrinketEnums.DropRule.KEEP;

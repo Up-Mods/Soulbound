@@ -24,12 +24,12 @@ public interface SoulboundItemCallback {
 
         final SoulboundContainer container;
         ItemStack stack;
-        float chance;
+        double levelPreservationChance;
 
-        public Context(SoulboundContainer container, ItemStack stack, float chance) {
+        public Context(SoulboundContainer container, ItemStack stack, double levelPreservationChance) {
             this.container = container;
             this.stack = stack;
-            this.chance = chance;
+            this.levelPreservationChance = levelPreservationChance;
         }
 
         public SoulboundContainer getContainer() {
@@ -44,12 +44,12 @@ public interface SoulboundItemCallback {
             this.stack = stack;
         }
 
-        public float getChance() {
-            return chance;
+        public double getLevelPreservationChance() {
+            return levelPreservationChance;
         }
 
-        public void setChance(float chance) {
-            this.chance = chance;
+        public void setLevelPreservationChance(double levelPreservationChance) {
+            this.levelPreservationChance = levelPreservationChance;
         }
     }
 }

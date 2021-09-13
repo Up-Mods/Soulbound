@@ -13,6 +13,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -37,7 +38,8 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 
     @Inject(method = "dropInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;dropAll()V"))
     private void soulbound_dropInventory(CallbackInfo callbackInfo) {
-        if(this.getServer() != null && !SoulboundHooks.isFakePlayer((PlayerEntity) (Object) this)) {
+        //noinspection ConstantConditions
+        if((Object) this instanceof ServerPlayerEntity && SoulboundHooks.isRealPlayer((ServerPlayerEntity) (Object) this)) {
             SoulboundPersistentState persistentState = SoulboundPersistentState.get(this.getServer());
             persistentState.storePlayer((PlayerEntity) (Object) this);
         }
@@ -52,9 +54,9 @@ public abstract class MixinPlayerEntity extends LivingEntity {
     }
 
     public void sb$storeToNbt(NbtCompound nbt) {
-        nbt.put("main", SoulboundHooks.getFilteredItemList(this.getInventory().main));
-        nbt.put("off_hand", SoulboundHooks.getFilteredItemList(this.getInventory().offHand));
-        nbt.put("armor", SoulboundHooks.getFilteredItemList(this.getInventory().armor));
+        nbt.put("main", SoulboundHooks.getFilteredItemList(this.getInventory().main, this.getRandom()));
+        nbt.put("off_hand", SoulboundHooks.getFilteredItemList(this.getInventory().offHand, this.getRandom()));
+        nbt.put("armor", SoulboundHooks.getFilteredItemList(this.getInventory().armor, this.getRandom()));
     }
 
     public void sb$restoreFromNbt(NbtCompound nbt, UnaryOperator<ItemStack> itemProcessor) {
