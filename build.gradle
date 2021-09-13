@@ -61,7 +61,7 @@ task apiJar(type: Jar, dependsOn: classes) {
         include String.valueOf(findProperty("api_package")).replace('.', '/') + "/**"
     }
     from("LICENSE.md") {
-        rename { "LICENSE_${archiveBaseName.get()}-${archiveAppendix.get()}" }
+        rename { "LICENSE_${archiveBaseName.get()}" }
     }
     includeEmptyDirs false
     manifest.mainAttributes(
