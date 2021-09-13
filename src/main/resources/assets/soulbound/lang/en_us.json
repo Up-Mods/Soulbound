@@ -1,3 +1,6 @@
 {
-  "enchantment.soulbound.soulbound": "Soulbound"
+  "enchantment.soulbound.soulbound": "Soulbound",
+  "enchantment.soulbound.soulbound.desc": "Retains items upon death",
+  "text.autoconfig.soulbound.option.soulboundPreservationRate": "Soulbound Enchantment Preservation Rate",
+  "text.autoconfig.soulbound.option.soulboundDropChance": "Item Drop Chance"
 }

@@ -2,9 +2,10 @@ package dev.upcraft.soulbound.core;
 
 import dev.upcraft.soulbound.Soulbound;
 import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.annotation.Config;
 import net.minecraft.util.math.MathHelper;
 
-@me.shedaniel.autoconfig.annotation.Config(name = Soulbound.MODID)
+@Config(name = Soulbound.MODID)
 public class SoulboundConfig implements ConfigData {
 
     public double soulboundPreservationRate = 1.0F;
