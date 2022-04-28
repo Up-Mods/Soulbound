@@ -37,4 +37,9 @@ public class SoulboundEnchantment extends Enchantment {
     public boolean isAcceptableItem(ItemStack stack) {
         return true;
     }
+
+    @Override
+    public boolean isTreasure() {
+        return Soulbound.CONFIG.get().soulboundIsTresureEnchantment;
+    }
 }

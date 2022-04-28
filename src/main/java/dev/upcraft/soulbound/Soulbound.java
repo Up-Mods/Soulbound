@@ -37,7 +37,7 @@ public class Soulbound implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Soulbound");
     public static final Supplier<SoulboundConfig> CONFIG = Util.make(() -> {
         AutoConfig.register(SoulboundConfig.class, JanksonConfigSerializer::new);
-        return () -> AutoConfig.getConfigHolder(SoulboundConfig.class).getConfig();
+        return AutoConfig.getConfigHolder(SoulboundConfig.class);
     });
     public static final RegistryKey<? extends Registry<SoulboundContainerProvider<?>>> CONTAINERS_KEY = RegistryKey.ofRegistry(new Identifier(MODID, "containers"));
     public static final MutableRegistry<SoulboundContainerProvider<?>> CONTAINERS = Util.make(new SimpleRegistry<>(CONTAINERS_KEY, Lifecycle.stable()), it -> ((FabricRegistry) it).build(ImmutableSet.of(RegistryAttribute.PERSISTED)));
