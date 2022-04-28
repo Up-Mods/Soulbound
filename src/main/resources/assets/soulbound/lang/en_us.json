@@ -2,5 +2,6 @@
   "enchantment.soulbound.soulbound": "Soulbound",
   "enchantment.soulbound.soulbound.desc": "Retains items upon death",
   "text.autoconfig.soulbound.option.soulboundPreservationRate": "Soulbound Enchantment Preservation Rate",
-  "text.autoconfig.soulbound.option.soulboundDropChance": "Item Drop Chance"
+  "text.autoconfig.soulbound.option.soulboundDropChance": "Item Drop Chance",
+  "text.autoconfig.soulbound.option.soulboundIsTreasureEnchantment": "Soulbound is a Treasure-Enchantment"
 }
