@@ -6,9 +6,9 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 
-public class EnchantmentSoulbound extends Enchantment {
+public class SoulboundEnchantment extends Enchantment {
 
-    public EnchantmentSoulbound() {
+    public SoulboundEnchantment() {
         // Anybody who directly checks the target field is bad
         super(Rarity.VERY_RARE, EnchantmentTarget.BREAKABLE, EquipmentSlot.values());
     }

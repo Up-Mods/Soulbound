@@ -2,7 +2,7 @@ import com.modrinth.minotaur.TaskModrinthUpload
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'fabric-loom' version '0.9.+'
+    id 'fabric-loom' version '0.11.+'
     id "maven-publish"
     id "com.modrinth.minotaur" version "1.1.0"
 }
@@ -24,7 +24,7 @@ loom {
 java {
     withSourcesJar()
     toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -45,7 +45,7 @@ repositories {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    compileOnly "org.jetbrains:annotations:22.0.0"
+    compileOnly "org.jetbrains:annotations:23.0.0"
     modApi "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
