@@ -75,7 +75,7 @@ task apiJar(type: Jar, dependsOn: classes) {
 }
 
 task remapApiJar(type: RemapJarTask, dependsOn: apiJar) {
-    input.set(apiJar.archiveFile.get())
+    inputFile.set(apiJar.archiveFile)
     addNestedDependencies.set(false)
     archiveClassifier.set("api")
 }
