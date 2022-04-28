@@ -40,7 +40,7 @@ public class Soulbound implements ModInitializer {
         return AutoConfig.getConfigHolder(SoulboundConfig.class);
     });
     public static final RegistryKey<? extends Registry<SoulboundContainerProvider<?>>> CONTAINERS_KEY = RegistryKey.ofRegistry(new Identifier(MODID, "containers"));
-    public static final MutableRegistry<SoulboundContainerProvider<?>> CONTAINERS = Util.make(new SimpleRegistry<>(CONTAINERS_KEY, Lifecycle.stable()), it -> ((FabricRegistry) it).build(ImmutableSet.of(RegistryAttribute.PERSISTED)));
+    public static final MutableRegistry<SoulboundContainerProvider<?>> CONTAINERS = Util.make(new SimpleRegistry<>(CONTAINERS_KEY, Lifecycle.stable(), null), it -> ((FabricRegistry) it).build(ImmutableSet.of(RegistryAttribute.PERSISTED)));
     public static final SoulboundEnchantment ENCHANT_SOULBOUND = new SoulboundEnchantment();
     public static final SoulboundContainerProvider<PlayerInventoryContainer> PLAYER_CONTAINER_PROVIDER = new PlayerInventoryContainerProvider();
 
