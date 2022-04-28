@@ -30,7 +30,7 @@ public class SoulboundEnchantment extends Enchantment {
 
     @Override
     protected boolean canAccept(Enchantment other) {
-        return super.canAccept(other) && other != Enchantments.VANISHING_CURSE;
+        return super.canAccept(other) && other != Enchantments.VANISHING_CURSE && other != Enchantments.BINDING_CURSE;
     }
 
     @Override
