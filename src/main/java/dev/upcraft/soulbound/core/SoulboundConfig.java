@@ -10,7 +10,7 @@ public class SoulboundConfig implements ConfigData {
 
     public double soulboundPreservationRate = 1.0F;
     public double soulboundDropChance = 0.0F;
-    public boolean soulboundIsTresureEnchantment = false;
+    public boolean soulboundIsTreasureEnchantment = false;
 
     @Override
     public void validatePostLoad() throws ValidationException {

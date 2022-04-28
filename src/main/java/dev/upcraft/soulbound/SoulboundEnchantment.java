@@ -40,6 +40,6 @@ public class SoulboundEnchantment extends Enchantment {
 
     @Override
     public boolean isTreasure() {
-        return Soulbound.CONFIG.get().soulboundIsTresureEnchantment;
+        return Soulbound.CONFIG.get().soulboundIsTreasureEnchantment;
     }
 }
