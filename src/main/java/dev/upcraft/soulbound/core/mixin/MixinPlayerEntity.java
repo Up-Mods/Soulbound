@@ -6,7 +6,6 @@ import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
 import dev.upcraft.soulbound.core.SoulboundHooks;
 import dev.upcraft.soulbound.core.SoulboundPersistentState;
 import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainer;
-import net.fabricmc.fabric.mixin.dimension.EntityMixin;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,15 +26,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.UnaryOperator;
 
 @Mixin(value = PlayerEntity.class, priority = 6969)
-public abstract class MixinPlayerEntity extends LivingEntityMixin {
+@Implements(@Interface(iface = PlayerInventoryContainer.class, prefix = "sb$"))
+public abstract class MixinPlayerEntity extends LivingEntity {
 
-    // private MixinPlayerEntity(EntityType<? extends LivingEntity> entityType, World world) {
-    //     super(entityType, world);
-    //     throw new UnsupportedOperationException("mixin not transformed");
-    // }
+    private MixinPlayerEntity(EntityType<? extends LivingEntity> entityType, World world) {
+        super(entityType, world);
+        throw new UnsupportedOperationException("mixin not transformed");
+    }
+
+    @Inject(method = "dropInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;dropAll()V"))
+    private void soulbound_dropInventory(CallbackInfo callbackInfo) {
+        //noinspection ConstantConditions
+        if ((Object) this instanceof ServerPlayerEntity && SoulboundHooks.isRealPlayer((ServerPlayerEntity) (Object) this)) {
+            SoulboundPersistentState persistentState = SoulboundPersistentState.get(this.getServer());
+            persistentState.storePlayer((PlayerEntity) (Object) this);
+        }
+    }
 
     public SoulboundContainerProvider<? extends SoulboundContainer> sb$getProvider() {
         return Soulbound.PLAYER_CONTAINER_PROVIDER;
+    }
+
+    public LivingEntity sb$getEntity() {
+        return this;
     }
 
     public void sb$storeToNbt(NbtCompound nbt) {

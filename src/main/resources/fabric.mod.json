@@ -32,7 +32,7 @@
   "mixins": [
     "mixins.soulbound.json"
   ],
-  "requires": {
+  "depends": {
     "fabric": "*",
     "cloth-config2": "^6.0.0-0",
     "minecraft": "~1.19",
