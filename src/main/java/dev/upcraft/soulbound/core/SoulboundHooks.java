@@ -18,8 +18,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.random.Random;
 
-import java.util.Random;
 import java.util.function.UnaryOperator;
 
 public class SoulboundHooks {
@@ -31,7 +31,8 @@ public class SoulboundHooks {
     public static UnaryOperator<ItemStack> createItemProcessor(SoulboundContainer container) {
         Random random = container.getEntity().getRandom();
         return stack -> {
-            SoulboundItemCallback.Context ctx = new SoulboundItemCallback.Context(container, stack, Soulbound.CONFIG.get().soulboundPreservationRate);
+            SoulboundItemCallback.Context ctx = new SoulboundItemCallback.Context(container, stack,
+                    Soulbound.CONFIG.get().soulboundPreservationRate);
             if (SoulboundItemCallback.EVENT.invoker().apply(ctx) != TriState.FALSE) {
                 ItemStack itemStack = ctx.getStack();
                 if (ctx.getLevelPreservationChance() <= random.nextDouble()) {
@@ -76,7 +77,8 @@ public class SoulboundHooks {
     }
 
     public static boolean shouldKeepStack(ItemStack stack, Random random) {
-        return EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0 && Soulbound.CONFIG.get().soulboundDropChance <= random.nextDouble();
+        return EnchantmentHelper.getLevel(Soulbound.ENCHANT_SOULBOUND, stack) > 0
+                && Soulbound.CONFIG.get().soulboundDropChance <= random.nextDouble();
     }
 
     public static Int2ObjectMap<ItemStack> readItemList(NbtList list) {
@@ -89,7 +91,8 @@ public class SoulboundHooks {
         return value;
     }
 
-    public static void processPlayerDrops(PlayerEntity player, DefaultedList<ItemStack> targetInv, Int2ObjectMap<ItemStack> items, UnaryOperator<ItemStack> itemProcessor) {
+    public static void processPlayerDrops(PlayerEntity player, DefaultedList<ItemStack> targetInv,
+            Int2ObjectMap<ItemStack> items, UnaryOperator<ItemStack> itemProcessor) {
         items.int2ObjectEntrySet().forEach(e -> {
             ItemStack stack = itemProcessor.apply(e.getValue().copy());
             if (stack.isEmpty()) {
@@ -120,7 +123,9 @@ public class SoulboundHooks {
                 itemEntity.setDespawnImmediately();
             }
 
-            player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_PICKUP,
+                    SoundCategory.PLAYERS, 0.2F,
+                    ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
             player.currentScreenHandler.sendContentUpdates();
         } else {
             itemEntity = player.dropItem(stack, false);
