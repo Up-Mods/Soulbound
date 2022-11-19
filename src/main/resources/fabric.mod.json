@@ -27,6 +27,9 @@
   "entrypoints": {
     "main": [
       "dev.upcraft.soulbound.Soulbound"
+    ],
+    "modmenu": [
+      "dev.upcraft.soulbound.compat.ModmenuIntegration"
     ]
   },
   "mixins": [
