@@ -48,8 +48,8 @@ dependencies {
     compileOnly "org.jetbrains:annotations:23.0.0"
     modApi "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-    // modImplementation "dev.emi:trinkets:${project.trinkets_version}"
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modImplementation "dev.emi:trinkets:${project.trinkets_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation(include("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}")) {
         exclude group: 'net.fabricmc.fabric-api'
