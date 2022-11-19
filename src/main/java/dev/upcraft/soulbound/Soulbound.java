@@ -16,7 +16,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.impl.registry.sync.FabricRegistry;
-import net.fabricmc.fabric.mixin.registry.sync.AccessorRegistry;
+import net.fabricmc.fabric.mixin.registry.sync.RegistryAccessor;
+
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -47,7 +48,7 @@ public class Soulbound implements ModInitializer {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void onInitialize() {
-        AccessorRegistry.getROOT().add(((AccessorRegistry) CONTAINERS).getRegistryKey(), CONTAINERS, Lifecycle.stable());
+        RegistryAccessor.getROOT().add(((RegistryAccessor) CONTAINERS).getRegistryKey(), CONTAINERS, Lifecycle.stable());
         Registry.register(Registry.ENCHANTMENT, new Identifier(MODID, "soulbound"), ENCHANT_SOULBOUND);
         Registry.register(CONTAINERS, new Identifier(MODID, "player_inventory"), PLAYER_CONTAINER_PROVIDER);
         SoulboundHooks.loadCompat("trinkets", "dev.upcraft.soulbound.compat.TrinketsIntegration");
