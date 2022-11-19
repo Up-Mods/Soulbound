@@ -1,9 +1,9 @@
 package dev.upcraft.soulbound.compat;
 
-// import dev.emi.trinkets.api.TrinketComponent;
-// import dev.emi.trinkets.api.TrinketEnums;
-// import dev.emi.trinkets.api.TrinketsApi;
-// import dev.emi.trinkets.api.event.TrinketDropCallback;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketEnums;
+import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.event.TrinketDropCallback;
 import dev.upcraft.soulbound.Soulbound;
 import dev.upcraft.soulbound.api.SoulboundApi;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
@@ -20,7 +20,7 @@ import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unused") // called by reflection
 public class TrinketsIntegration {
-/*
+
     public static final SoulboundContainerProvider<SoulboundContainer> DUMMY_PROVIDER = entity -> {
         TrinketComponent component = TrinketsApi.getTrinketComponent(entity).orElse(null);
         return component != null ? new SoulboundContainer() {
@@ -53,14 +53,16 @@ public class TrinketsIntegration {
     private static void register() {
         TrinketDropCallback.EVENT.register((rule, stack, ref, entity) -> {
             if (SoulboundHooks.shouldKeepStack(stack, entity.getRandom())) {
-                @Nullable SoulboundContainer container = DUMMY_PROVIDER.getContainer(entity);
+                @Nullable
+                SoulboundContainer container = DUMMY_PROVIDER.getContainer(entity);
                 if (container != null && !SoulboundHooks.createItemProcessor(container).apply(stack).isEmpty()) {
                     return TrinketEnums.DropRule.KEEP;
                 }
             }
             return TrinketEnums.DropRule.DEFAULT;
         });
-        Registry.register(SoulboundApi.CONTAINERS, new Identifier(Soulbound.MODID, "trinkets_integration"), DUMMY_PROVIDER);
+        Registry.register(SoulboundApi.CONTAINERS, new Identifier(Soulbound.MODID, "trinkets_integration"),
+                DUMMY_PROVIDER);
     }
-     */
+
 }
