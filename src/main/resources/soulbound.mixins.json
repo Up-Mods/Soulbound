@@ -4,7 +4,7 @@
   "package": "dev.upcraft.soulbound.core.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "MixinPlayerEntity"
+    "PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

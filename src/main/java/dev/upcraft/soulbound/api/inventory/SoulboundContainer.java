@@ -1,8 +1,9 @@
 package dev.upcraft.soulbound.api.inventory;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.UnaryOperator;
 
@@ -12,7 +13,7 @@ public interface SoulboundContainer {
 
     LivingEntity getEntity();
 
-    void storeToNbt(NbtCompound nbt);
+    void storeToNbt(CompoundTag nbt);
 
-    void restoreFromNbt(NbtCompound nbt, UnaryOperator<ItemStack> itemProcessor);
+    void restoreFromNbt(CompoundTag nbt, UnaryOperator<ItemStack> itemProcessor);
 }

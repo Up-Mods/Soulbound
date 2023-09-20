@@ -1,72 +1,70 @@
 package dev.upcraft.soulbound;
 
-import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Lifecycle;
 import dev.upcraft.soulbound.api.SoulboundApi;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
+import dev.upcraft.soulbound.compat.SoulboundCompat;
+import dev.upcraft.soulbound.compat.trinkets.TrinketsIntegration;
+import dev.upcraft.soulbound.compat.universalgraves.UniversalGravesCompat;
 import dev.upcraft.soulbound.core.SoulboundConfig;
 import dev.upcraft.soulbound.core.SoulboundHooks;
 import dev.upcraft.soulbound.core.SoulboundPersistentState;
 import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainer;
 import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainerProvider;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import dev.upcraft.soulbound.init.SoulboundContainerProviders;
+import dev.upcraft.soulbound.init.SoulboundEnchantments;
+import dev.upcraft.sparkweave.api.registry.RegistryService;
+import eu.midnightdust.lib.config.MidnightConfig;
+import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
-import net.fabricmc.fabric.impl.registry.sync.FabricRegistry;
-import net.fabricmc.fabric.mixin.registry.sync.AccessorRegistry;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.registry.MutableRegistry;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.quiltmc.loader.api.ModContainer;
+import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
+import org.quiltmc.qsl.entity.event.api.ServerPlayerEntityCopyCallback;
 
 import java.util.Map;
-import java.util.function.Supplier;
+
 
 public class Soulbound implements ModInitializer {
 
     public static final String MODID = "soulbound";
     public static final Logger LOGGER = LogManager.getLogger("Soulbound");
-    public static final Supplier<SoulboundConfig> CONFIG = Util.make(() -> {
-        AutoConfig.register(SoulboundConfig.class, JanksonConfigSerializer::new);
-        return AutoConfig.getConfigHolder(SoulboundConfig.class);
-    });
-    public static final RegistryKey<? extends Registry<SoulboundContainerProvider<?>>> CONTAINERS_KEY = RegistryKey.ofRegistry(new Identifier(MODID, "containers"));
-    public static final MutableRegistry<SoulboundContainerProvider<?>> CONTAINERS = Util.make(new SimpleRegistry<>(CONTAINERS_KEY, Lifecycle.stable(), null), it -> ((FabricRegistry) it).build(ImmutableSet.of(RegistryAttribute.PERSISTED)));
-    public static final SoulboundEnchantment ENCHANT_SOULBOUND = new SoulboundEnchantment();
-    public static final SoulboundContainerProvider<PlayerInventoryContainer> PLAYER_CONTAINER_PROVIDER = new PlayerInventoryContainerProvider();
+	public static final SoulboundContainerProvider<PlayerInventoryContainer> PLAYER_CONTAINER_PROVIDER = new PlayerInventoryContainerProvider();
+	public static Registry<SoulboundContainerProvider<?>> CONTAINER_PROVIDERS;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void onInitialize() {
-        AccessorRegistry.getROOT().add(((AccessorRegistry) CONTAINERS).getRegistryKey(), CONTAINERS, Lifecycle.stable());
-        Registry.register(Registry.ENCHANTMENT, new Identifier(MODID, "soulbound"), ENCHANT_SOULBOUND);
-        Registry.register(CONTAINERS, new Identifier(MODID, "player_inventory"), PLAYER_CONTAINER_PROVIDER);
-        SoulboundHooks.loadCompat("trinkets", "dev.upcraft.soulbound.compat.TrinketsIntegration");
-        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
-            if (!alive) {
-                SoulboundPersistentState persistentState = SoulboundPersistentState.get(newPlayer.getServer());
-                Map<Identifier, NbtCompound> saveData = persistentState.restorePlayer(oldPlayer);
+    public void onInitialize(ModContainer mod) {
+		MidnightConfig.init(MODID, SoulboundConfig.class);
+		CONTAINER_PROVIDERS = FabricRegistryBuilder.createSimple(SoulboundApi.CONTAINER_PROVIDER_REGISTRY).attribute(RegistryAttribute.PERSISTED).buildAndRegister();
+
+		// this must run before the registry handlers
+		SoulboundCompat.TRINKETS.ifEnabled(() -> TrinketsIntegration::load);
+		SoulboundCompat.UNIVERSAL_GRAVES.ifEnabled(() -> UniversalGravesCompat::load);
+
+		var service = RegistryService.get();
+		SoulboundEnchantments.ENCHANTMENTS.accept(service);
+		SoulboundContainerProviders.CONTAINER_PROVIDERS.accept(service);
+
+        ServerPlayerEntityCopyCallback.EVENT.register((copy, original, wasDeath) -> {
+            if (wasDeath) {
+                SoulboundPersistentState persistentState = SoulboundPersistentState.get(copy);
+                Map<ResourceLocation, CompoundTag> saveData = persistentState.restorePlayer(original);
                 if (saveData != null) {
-                    saveData.forEach((id, data) -> SoulboundApi.CONTAINERS.getOrEmpty(id).ifPresentOrElse(provider -> {
-                        @Nullable SoulboundContainer container = provider.getContainer(newPlayer);
+                    saveData.forEach((id, data) -> CONTAINER_PROVIDERS.getOptional(id).ifPresentOrElse(provider -> {
+                        @Nullable SoulboundContainer container = provider.getContainer(copy);
                         if (container != null) {
                             container.restoreFromNbt(data, SoulboundHooks.createItemProcessor(container));
                         } else {
                             Soulbound.LOGGER.warn("tried to deserialize null container for provider {}", id);
                         }
-                    }, () -> Soulbound.LOGGER.error("tried to deserialize unknown provider {} for player {}", id, newPlayer.getEntityName())));
+                    }, () -> Soulbound.LOGGER.error("tried to deserialize unknown provider {} for player {}", id, copy.getGameProfile().getName())));
                 }
             }
         });
     }
-
 }

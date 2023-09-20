@@ -1,6 +1,6 @@
 package dev.upcraft.soulbound.api.inventory;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
 public interface SoulboundContainerProvider<T extends SoulboundContainer> {

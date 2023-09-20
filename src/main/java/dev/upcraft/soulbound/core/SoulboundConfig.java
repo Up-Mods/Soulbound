@@ -1,20 +1,15 @@
 package dev.upcraft.soulbound.core;
 
-import dev.upcraft.soulbound.Soulbound;
-import me.shedaniel.autoconfig.ConfigData;
-import me.shedaniel.autoconfig.annotation.Config;
-import net.minecraft.util.math.MathHelper;
+import eu.midnightdust.lib.config.MidnightConfig;
 
-@Config(name = Soulbound.MODID)
-public class SoulboundConfig implements ConfigData {
+public class SoulboundConfig extends MidnightConfig {
 
-    public double soulboundPreservationRate = 1.0F;
-    public double soulboundDropChance = 0.0F;
-    public boolean soulboundIsTreasureEnchantment = false;
+	@Entry(min = 0.0F, max = 1.0F)
+    public static double soulboundPreservationRate = 1.0F;
 
-    @Override
-    public void validatePostLoad() throws ValidationException {
-        soulboundPreservationRate = MathHelper.clamp(soulboundPreservationRate, 0.0F, 1.0F);
-        soulboundDropChance = MathHelper.clamp(soulboundDropChance, 0.0F, 1.0F);
-    }
+	@Entry(min = 0.0F, max = 1.0F)
+    public static double soulboundDropChance = 0.0F;
+
+	@Entry
+    public static boolean soulboundIsTreasureEnchantment = false;
 }

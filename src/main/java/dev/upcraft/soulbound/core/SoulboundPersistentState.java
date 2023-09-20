@@ -3,41 +3,38 @@ package dev.upcraft.soulbound.core;
 import com.google.common.collect.Maps;
 import dev.upcraft.soulbound.Soulbound;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
-import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.PersistentState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.saveddata.SavedData;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
-public class SoulboundPersistentState extends PersistentState {
+public class SoulboundPersistentState extends SavedData {
 
     private static final String PERSISTENT_ID = "soulbound_persisted_items";
-    private final Map<UUID, Map<Identifier, NbtCompound>> persistedData = Maps.newHashMap();
+    private final Map<UUID, Map<ResourceLocation, CompoundTag>> persistedData = Maps.newHashMap();
 
-    public static SoulboundPersistentState get(MinecraftServer server) {
-        return server.getOverworld().getPersistentStateManager().getOrCreate(SoulboundPersistentState::fromNbt, SoulboundPersistentState::new, PERSISTENT_ID);
+    public static SoulboundPersistentState get(ServerPlayer player) {
+        return player.server.overworld().getDataStorage().computeIfAbsent(SoulboundPersistentState::fromNbt, SoulboundPersistentState::new, PERSISTENT_ID);
     }
 
-    private static SoulboundPersistentState fromNbt(NbtCompound tag) {
+    private static SoulboundPersistentState fromNbt(CompoundTag tag) {
         SoulboundPersistentState value = new SoulboundPersistentState();
-        NbtList playerTags = tag.getList("players", NbtElement.COMPOUND_TYPE);
+        ListTag playerTags = tag.getList("players", Tag.TAG_COMPOUND);
         for (int j = 0; j < playerTags.size(); j++) {
-            NbtCompound playerTag = playerTags.getCompound(j);
-            UUID uuid = playerTag.getUuid("uuid");
-            Map<Identifier, NbtCompound> map = new HashMap<>();
-            NbtList inventories = playerTag.getList("inventories", NbtElement.COMPOUND_TYPE);
+			CompoundTag playerTag = playerTags.getCompound(j);
+            UUID uuid = playerTag.getUUID("uuid");
+            Map<ResourceLocation, CompoundTag> map = new HashMap<>();
+			ListTag inventories = playerTag.getList("inventories", Tag.TAG_COMPOUND);
             for (int i = 0; i < inventories.size(); i++) {
-                NbtCompound inv = inventories.getCompound(i);
-                Identifier id = new Identifier(inv.getString("id"));
-                if (Soulbound.CONTAINERS.containsId(id)) {
+				CompoundTag inv = inventories.getCompound(i);
+				ResourceLocation id = new ResourceLocation(inv.getString("id"));
+                if (Soulbound.CONTAINER_PROVIDERS.containsKey(id)) {
                     map.put(id, inv.getCompound("data"));
                 } else {
                     Soulbound.LOGGER.error("unable to read data for unknown provider {} for player {}", id, uuid);
@@ -52,13 +49,14 @@ public class SoulboundPersistentState extends PersistentState {
         super();
     }
 
-    public void storePlayer(PlayerEntity player) {
-        Map<Identifier, NbtCompound> data = new HashMap<>();
-        Soulbound.CONTAINERS.getIds().forEach(id -> {
-            SoulboundContainerProvider<?> provider = Objects.requireNonNull(Soulbound.CONTAINERS.get(id));
+    public void storePlayer(ServerPlayer player) {
+        Map<ResourceLocation, CompoundTag> data = new HashMap<>();
+        Soulbound.CONTAINER_PROVIDERS.entrySet().forEach(entry -> {
+			var id = entry.getKey().location();
+			var provider = entry.getValue();
             SoulboundContainer container = provider.getContainer(player);
             if (container != null) {
-                NbtCompound containerData = new NbtCompound();
+				CompoundTag containerData = new CompoundTag();
                 container.storeToNbt(containerData);
                 if (!containerData.isEmpty()) {
                     data.put(id, containerData);
@@ -66,26 +64,26 @@ public class SoulboundPersistentState extends PersistentState {
             }
         });
         this.persistedData.put(player.getGameProfile().getId(), data);
-        markDirty();
+        setDirty();
     }
 
-    public Map<Identifier, NbtCompound> restorePlayer(PlayerEntity player) {
-        Map<Identifier, NbtCompound> value = persistedData.remove(player.getGameProfile().getId());
+    public Map<ResourceLocation, CompoundTag> restorePlayer(ServerPlayer player) {
+        Map<ResourceLocation, CompoundTag> value = persistedData.remove(player.getGameProfile().getId());
         if (value != null) {
-            markDirty();
+            setDirty();
         }
         return value;
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound tag) {
-        NbtList playerTags = new NbtList();
+    public CompoundTag save(CompoundTag tag) {
+        ListTag playerTags = new ListTag();
         persistedData.forEach((uuid, map) -> {
-            NbtCompound playerTag = new NbtCompound();
-            playerTag.putUuid("uuid", uuid);
-            NbtList inventories = new NbtList();
+            CompoundTag playerTag = new CompoundTag();
+            playerTag.putUUID("uuid", uuid);
+            ListTag inventories = new ListTag();
             map.forEach((identifier, data) -> {
-                NbtCompound inv = new NbtCompound();
+				CompoundTag inv = new CompoundTag();
                 inv.putString("id", identifier.toString());
                 inv.put("data", data);
                 inventories.add(inv);

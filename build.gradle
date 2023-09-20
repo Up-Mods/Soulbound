@@ -39,6 +39,20 @@ repositories {
         name = "ParchmentMC"
         url = "https://maven.parchmentmc.org"
     }
+	maven {
+		name = "Up-Mods"
+		url = "https://maven.uuid.gg/releases"
+	}
+	maven {
+		// needed for polymer
+		name = "NucleoidMC"
+		url = "https://maven.nucleoid.xyz"
+	}
+	maven {
+		// needed for fabric permissions api
+		name = "Sonatype Snapshots"
+		url = "https://oss.sonatype.org/content/repositories/snapshots"
+	}
 }
 
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
@@ -57,14 +71,21 @@ dependencies {
     modImplementation libs.quilted.fabric.api
     modLocalRuntime libs.quilted.fabric.api.deprecated
 
+	modImplementation libs.sparkweave
+
     modImplementation libs.midnightlib
 
     annotationProcessor libs.mixinextras
     modIncludeApi libs.mixinextras
 
     modLocalImplementation libs.emi
+
     modLocalRuntime libs.modmenu
-	modLocalImplementation libs.universalgraves
+
+	modLocalImplementation libs.universal.graves
+	modLocalRuntime libs.bundles.universal.graves.dependencies
+
+	modLocalImplementation libs.trinkets
 
     modLocalRuntime libs.lazydfu
 }

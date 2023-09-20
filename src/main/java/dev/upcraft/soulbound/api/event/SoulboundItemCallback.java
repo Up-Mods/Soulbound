@@ -3,8 +3,8 @@ package dev.upcraft.soulbound.api.event;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
+import org.quiltmc.qsl.base.api.util.TriState;
 
 public interface SoulboundItemCallback {
 
