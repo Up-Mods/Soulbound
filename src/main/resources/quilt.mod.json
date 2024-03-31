@@ -22,22 +22,15 @@
 		"entrypoints": {
 			"init": [
 				"dev.upcraft.soulbound.Soulbound"
-			],
-			"client_init": [
-				"dev.upcraft.sparkweave.entrypoint.Client"
-			],
-			"pre_launch": [
-				"dev.upcraft.sparkweave.entrypoint.PreLaunch"
 			]
 		},
 		"depends": [
 			{
 				"id": "quilt_loader",
-				"versions": ">=0.20.0-"
+				"versions": ">=${quilt_loader_version}"
 			},
 			{
 				"id": "quilted_fabric_api",
-				"versions": ">=5.0.0-",
 				"mc-publish": {
 					"modrinth": "qvIfYCYJ",
 					"curseforge": "634179"
@@ -51,26 +44,32 @@
 				}
 			},
 			{
-				"id": "midnightlib",
+				"id": "resourcefulconfig",
 				"mc-publish": {
-					"modrinth": "codAaoxh",
-					"curseforge": "488090"
+					"curseforge": "714059",
+					"modrinth": "M1953qlQ"
 				}
 			},
 			{
 				"id": "minecraft",
-				"versions": "=1.20.1"
+				"versions": "=${minecraft_version}"
 			}
 		]
 	},
 	"mixin": [
 		"soulbound.mixins.json"
 	],
+	"minecraft": {
+		"environment": "*"
+	},
 	"mc-publish": {
 		"curseforge": "618682",
 		"modrinth": "9QyjzbTh",
 		"loaders": [
 			"quilt"
+		],
+		"dependencies": [
+			"universal-graves(optional){modrinth:yn9u3ypm}{curseforge:497175}"
 		]
 	}
 }

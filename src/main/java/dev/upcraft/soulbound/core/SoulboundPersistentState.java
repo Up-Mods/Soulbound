@@ -3,6 +3,7 @@ package dev.upcraft.soulbound.core;
 import com.google.common.collect.Maps;
 import dev.upcraft.soulbound.Soulbound;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
+import dev.upcraft.soulbound.init.SoulboundContainerProviders;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -19,8 +20,10 @@ public class SoulboundPersistentState extends SavedData {
     private static final String PERSISTENT_ID = "soulbound_persisted_items";
     private final Map<UUID, Map<ResourceLocation, CompoundTag>> persistedData = Maps.newHashMap();
 
+	private static final Factory<SoulboundPersistentState> FACTORY = new Factory<>(SoulboundPersistentState::new, SoulboundPersistentState::fromNbt, null);
+
     public static SoulboundPersistentState get(ServerPlayer player) {
-        return player.server.overworld().getDataStorage().computeIfAbsent(SoulboundPersistentState::fromNbt, SoulboundPersistentState::new, PERSISTENT_ID);
+        return player.server.overworld().getDataStorage().computeIfAbsent(FACTORY, PERSISTENT_ID);
     }
 
     private static SoulboundPersistentState fromNbt(CompoundTag tag) {
@@ -34,7 +37,7 @@ public class SoulboundPersistentState extends SavedData {
             for (int i = 0; i < inventories.size(); i++) {
 				CompoundTag inv = inventories.getCompound(i);
 				ResourceLocation id = new ResourceLocation(inv.getString("id"));
-                if (Soulbound.CONTAINER_PROVIDERS.containsKey(id)) {
+                if (SoulboundContainerProviders.REGISTRY.containsKey(id)) {
                     map.put(id, inv.getCompound("data"));
                 } else {
                     Soulbound.LOGGER.error("unable to read data for unknown provider {} for player {}", id, uuid);
@@ -51,7 +54,7 @@ public class SoulboundPersistentState extends SavedData {
 
     public void storePlayer(ServerPlayer player) {
         Map<ResourceLocation, CompoundTag> data = new HashMap<>();
-        Soulbound.CONTAINER_PROVIDERS.entrySet().forEach(entry -> {
+		SoulboundContainerProviders.REGISTRY.entrySet().forEach(entry -> {
 			var id = entry.getKey().location();
 			var provider = entry.getValue();
             SoulboundContainer container = provider.getContainer(player);

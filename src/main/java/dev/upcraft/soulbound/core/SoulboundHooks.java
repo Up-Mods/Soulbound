@@ -116,7 +116,7 @@ public class SoulboundHooks {
             itemEntity = player.drop(stack, false);
             if (itemEntity != null) {
                 itemEntity.setNoPickUpDelay();
-                itemEntity.setThrower(player.getUUID());
+                itemEntity.setTarget(player.getUUID());
             }
         }
     }

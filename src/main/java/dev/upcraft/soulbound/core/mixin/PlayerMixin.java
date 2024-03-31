@@ -1,11 +1,11 @@
 package dev.upcraft.soulbound.core.mixin;
 
-import dev.upcraft.soulbound.Soulbound;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
 import dev.upcraft.soulbound.core.SoulboundHooks;
 import dev.upcraft.soulbound.core.SoulboundPersistentState;
 import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainer;
+import dev.upcraft.soulbound.init.SoulboundContainerProviders;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,7 +47,7 @@ public abstract class PlayerMixin extends LivingEntity {
     }
 
     public SoulboundContainerProvider<? extends SoulboundContainer> sb$getProvider() {
-        return Soulbound.PLAYER_CONTAINER_PROVIDER;
+        return SoulboundContainerProviders.PLAYER_INVENTORY.get();
     }
 
     public LivingEntity sb$getEntity() {

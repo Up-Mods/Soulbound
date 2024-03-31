@@ -1,3 +1,8 @@
 {
-  "enchantment.soulbound.soulbound": "灵魂绑定"
+  "config.soulbound.soulboundDropChance": "Item Drop Chance",
+  "config.soulbound.soulboundIsTreasureEnchantment": "Soulbound is a Treasure-Enchantment",
+  "config.soulbound.soulboundPreservationRate": "Soulbound Enchantment Preservation Rate",
+  "config.soulbound.title": "Soulbound",
+  "enchantment.soulbound.soulbound": "灵魂绑定",
+  "enchantment.soulbound.soulbound.desc": "Retains items upon death"
 }
