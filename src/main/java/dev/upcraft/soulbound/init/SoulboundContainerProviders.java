@@ -2,8 +2,8 @@ package dev.upcraft.soulbound.init;
 
 import dev.upcraft.soulbound.api.SoulboundApi;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
-import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainer;
-import dev.upcraft.soulbound.core.inventory.PlayerInventoryContainerProvider;
+import dev.upcraft.soulbound.inventory.PlayerInventoryContainer;
+import dev.upcraft.soulbound.inventory.PlayerInventoryContainerProvider;
 import dev.upcraft.sparkweave.api.registry.RegistryHandler;
 import dev.upcraft.sparkweave.api.registry.RegistrySupplier;
 

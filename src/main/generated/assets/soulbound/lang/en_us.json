@@ -1,0 +1,9 @@
+{
+  "config.soulbound.soulbound_is_treasure_enchantment": "Soulbound is a Treasure-Enchantment",
+  "config.soulbound.soulbound_reduction_rate": "Chance to reduce Soulbound enchantment Level by 1",
+  "config.soulbound.soulbound_success_chance": "Chance to apply Soulbound enchantment effect",
+  "enchantment.soulbound.soulbound": "Soulbound",
+  "enchantment.soulbound.soulbound.desc": "Retains items upon death",
+  "tag.enchantment.soulbound.soulbound_incompatible_with": "Incompatible with Soulbound",
+  "tag.item.soulbound.soulbound_cannot_apply_to": "Cannot apply Soulbound enchantment"
+}

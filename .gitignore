@@ -1,26 +1,30 @@
-# General use .gitignore for Minecraft modding.
+# Eclipse
+*.launch
 
-# Directories
-/.gradle/
-/build/
-/eclipse/
-/run/
-/out/
-/asm/
-/bin/
+# JetBrains IDEs
 /.idea/
-/.metadata/
-/.settings/
-/libs/
-
-# File Extensions
-*.psd
 *.iml
 *.ipr
 *.iws
-*.classpath
-*.project
-*.class
 
-# Specific files
-Thumbs.db
+# Visual Studio Code
+/.settings/
+/.vscode/
+/bin/
+.classpath
+.project
+
+# macOS
+*.DS_Store
+
+# Gradle
+/.gradle/
+/build/
+/out/
+/classes/
+
+# Loom
+/run/
+
+# Data Generation
+/src/main/generated/.cache/

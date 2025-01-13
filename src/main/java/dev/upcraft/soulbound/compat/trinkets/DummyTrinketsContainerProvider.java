@@ -5,6 +5,7 @@ import dev.emi.trinkets.api.TrinketsApi;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,11 @@ class DummyTrinketsContainerProvider implements SoulboundContainerProvider<Soulb
 		@Override
 		public LivingEntity getEntity() {
 			return component().getEntity();
+		}
+
+		@Override
+		public RandomSource getRandom() {
+			return getEntity().getRandom();
 		}
 
 		@Override

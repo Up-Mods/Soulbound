@@ -1,152 +1,230 @@
 plugins {
-    id "maven-publish"
-    alias libs.plugins.quilt.loom
-    alias libs.plugins.chenille
+	id 'idea'
+	id 'maven-publish'
+	alias libs.plugins.fabric.loom
 }
 
 def ENV = System.getenv()
 def buildTime = ENV.BUILD_TIME ?: new Date().format("yyyyMMddHHmmss")
 
-// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-project.ext.javaVersion = 17
+def javaVersion = 17
 
-archivesBaseName = "Soulbound"
-group = "dev.upcraft"
+group = project.maven_group_id
 
 boolean isPreviewBuild = !ENV.TAG || ENV.TAG.matches(".+-.+")
 def buildNumber = !ENV.TAG ? ("${ENV.BUILD_NUMBER ? "build.${ENV.BUILD_NUMBER}" : buildTime}-${libs.versions.minecraft.get()}") : ""
 version = (ENV.TAG ?: "development") + ((isPreviewBuild && !ENV.TAG) ? "+${buildNumber}" : "")
 
-println("Building ${project.name} ${version}")
-
-//FIXME workaround for quilt-loom bug
-project.configurations.configureEach {
-    exclude(group: "net.fabricmc", module: "fabric-loader")
-    exclude(group: "net.fabricmc.fabric-api")
-}
-
-chenille {
-    javaVersion = project.ext.javaVersion
-    repositories {
-        ladysnake()
-        modrinth()
-        terraformers()
-    }
+base {
+	archivesName.set(project.mod_id)
 }
 
 repositories {
-    maven {
-        name = "ParchmentMC"
-        url = "https://maven.parchmentmc.org"
-    }
+	mavenCentral()
 	maven {
-		name = "Up-Mods"
-		url = "https://maven.uuid.gg/releases"
+		name = 'TerraformersMC'
+		url = 'https://maven.terraformersmc.com'
+	}
+	maven {
+		name = 'Up-Mods'
+		url = 'https://maven.uuid.gg/releases'
+	}
+	maven {
+		name = 'Ladysnake'
+		url = 'https://maven.ladysnake.org/releases'
+	}
+	maven {
+		name = 'TeamResourceful'
+		url = 'https://maven.teamresourceful.com/repository/maven-public'
 	}
 	maven {
 		// needed for polymer
-		name = "NucleoidMC"
-		url = "https://maven.nucleoid.xyz"
+		name = 'NucleoidMC'
+		url = 'https://maven.nucleoid.xyz'
 	}
 	maven {
 		// needed for fabric permissions api
-		name = "Sonatype Snapshots"
-		url = "https://oss.sonatype.org/content/repositories/snapshots"
+		name = 'SonatypeSnapshots'
+		url = 'https://oss.sonatype.org/content/repositories/snapshots'
+	}
+	maven {
+		name = 'ParchmentMC'
+		url = 'https://maven.parchmentmc.org'
+		content {
+			includeGroupAndSubgroups('org.parchmentmc')
+		}
+	}
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = 'Modrinth'
+				url = 'https://api.modrinth.com/maven'
+			}
+		}
+		filter {
+			includeGroup('maven.modrinth')
+		}
+	}
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = 'Curseforge'
+				url = 'https://cursemaven.com'
+			}
+		}
+		filter {
+			includeGroup('curse.maven')
+		}
 	}
 }
 
-// All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
-// See https://docs.gradle.org/current/userguide/platforms.html for information on how version catalogs work.
 dependencies {
-    minecraft libs.minecraft
-    mappings(loom.layered {
-        it.mappings variantOf(libs.quilt.mappings) { classifier 'intermediary-v2' }
-        it.parchment("${libs.parchment.mappings.get()}@zip")
-        it.officialMojangMappings { nameSyntheticMembers = false }
-    })
-    modImplementation libs.quilt.loader
+	minecraft libs.minecraft
+	mappings(loom.layered {
+		it.officialMojangMappings()
+		it.parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.minecraft.get()}:${libs.versions.parchment.mappings.get()}@zip")
+	})
 
-    // QSL is not a complete API; You will need Quilted Fabric API to fill in the gaps.
-    // Quilted Fabric API will automatically pull in the correct QSL version.
-    modImplementation libs.quilted.fabric.api
-    modLocalRuntime libs.quilted.fabric.api.deprecated
+	compileOnly libs.jetbrains.annotations
+
+	modImplementation libs.fabric.loader
+	modImplementation libs.fabric.api
 
 	modImplementation libs.sparkweave
 
-    modImplementation libs.midnightlib
+	modCompileOnly libs.modmenu
+	modLocalRuntime libs.modmenu
 
-    annotationProcessor libs.mixinextras
-    modIncludeApi libs.mixinextras
+	modImplementation libs.resourceful.config
 
-    modLocalImplementation libs.emi
+	modCompileOnly variantOf(libs.emi) { classifier 'api' }
+	modLocalRuntime libs.emi
 
-    modLocalRuntime libs.modmenu
+	modCompileOnly libs.universal.graves
+	modLocalRuntime libs.bundles.universal.graves.runtime
 
-	modLocalImplementation libs.universal.graves
-	modLocalRuntime libs.bundles.universal.graves.dependencies
+	modCompileOnly libs.trinkets
+	modLocalRuntime libs.trinkets
+}
 
-	modLocalImplementation libs.trinkets
+fabricApi {
+	configureDataGeneration()
+}
 
-    modLocalRuntime libs.lazydfu
+loom {
+	mods {
+		"${mod_id}" {
+			// Tell Loom about each source set used by your mod here. This ensures that your mod's classes are properly transformed by Loader.
+			sourceSet("main")
+		}
+	}
+
+//	accessWidenerPath.set(project.file("src/main/resources/${mod_id}.accesswidener"))
+
+	runs {
+		client {
+			ideConfigGenerated(true)
+			runDir("run")
+
+			if (project.hasProperty('mc_uuid')) {
+				programArg("--uuid=${project.findProperty('mc_uuid')}")
+			}
+
+			if (project.hasProperty('mc_username')) {
+				programArg("--username=${project.findProperty('mc_username')}")
+			}
+
+			if (project.hasProperty('mc_java_agent_path')) {
+				vmArg("-javaagent:${project.findProperty('mc_java_agent_path')}")
+			}
+		}
+	}
 }
 
 processResources {
-    inputs.property "version", version
+	filteringCharset = "UTF-8"
 
-    filesMatching("quilt.mod.json") {
-        expand "version": version
-    }
+	def expandProps = [
+		"version"             : version,
+		"maven_group_id"      : maven_group_id,
+		"mod_id"              : mod_id,
+		"mod_display_name"    : mod_display_name,
+		"mod_description"     : mod_description,
+		"sources_url"         : sources_url,
+		"issues_url"          : issues_url,
+		"license_url"         : license_url,
+		"discord_url"         : discord_url,
+		"homepage_url"        : homepage_url,
+
+		"minecraft_version"   : libs.versions.minecraft.get(),
+		"fabric_loader_version": libs.versions.fabric.loader.get(),
+		"java_version": "${javaVersion}",
+	]
+
+	filesMatching(['pack.mcmeta', '*.mod.json', '*.mixins.json']) {
+		expand expandProps
+	}
+	inputs.properties(expandProps)
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    it.options.release.set(project.ext.javaVersion)
+tasks.withType(JavaCompile) {
+	// ensure that the encoding is set to UTF-8, no matter what the system default is
+	// this fixes some edge cases with special characters not displaying correctly
+	// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+	options.encoding = "UTF-8"
+
+	options.release.set(javaVersion)
 }
 
 java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task if it is present.
-    withSourcesJar()
-    withJavadocJar()
+	withSourcesJar()
 
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(javaVersion)
-        vendor = JvmVendorSpec.MICROSOFT
-    }
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(javaVersion))
+		vendor = JvmVendorSpec.MICROSOFT
+	}
 }
 
-// If you plan to use a different file for the license, don't forget to change the file name here!
 jar {
-    from(layout.projectDirectory) {
-        include "LICENSE.md"
-        rename { "LICENSE_${archivesBaseName}.md" }
-    }
+	from(layout.projectDirectory) {
+		include "LICENSE.md"
+		rename { "LICENSE_${project.mod_id}.md" }
+	}
 
-    manifest.mainAttributes(
-            "Implementation-Title": project.archivesBaseName,
-            "Implementation-Version": project.version,
-            "Maven-Artifact": "${project.group.toLowerCase(Locale.ROOT)}:${project.archivesBaseName.toLowerCase(Locale.ROOT)}:${project.version}",
-            "Built-On-Minecraft": libs.versions.minecraft.get(),
-            "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
-    )
+	manifest.mainAttributes(
+		"Implementation-Title": project.mod_id,
+		"Implementation-Version": project.version,
+		"Maven-Artifact": "${project.group}:${rootProject.name}-Fabric:${project.version}",
+		"Built-On-Minecraft": libs.versions.minecraft.get(),
+		"Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
+	)
 }
 
-// Configure the maven publication
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+	publications {
+		mavenJava(MavenPublication) {
+			artifactId "${rootProject.name}-Fabric"
+			from components.java
+		}
+	}
 
-    repositories {
-        if (ENV.MAVEN_UPLOAD_URL) {
-            maven {
-                url = ENV.MAVEN_UPLOAD_URL
-                credentials {
-                    username = ENV.MAVEN_UPLOAD_USERNAME
-                    password = ENV.MAVEN_UPLOAD_PASSWORD
-                }
-            }
-        }
-    }
+	repositories {
+		if (ENV.MAVEN_UPLOAD_URL) {
+			maven {
+				url = ENV.MAVEN_UPLOAD_URL
+				credentials {
+					username = ENV.MAVEN_UPLOAD_USERNAME
+					password = ENV.MAVEN_UPLOAD_PASSWORD
+				}
+			}
+		}
+	}
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+	module {
+		downloadSources = true
+		downloadJavadoc = true
+	}
 }

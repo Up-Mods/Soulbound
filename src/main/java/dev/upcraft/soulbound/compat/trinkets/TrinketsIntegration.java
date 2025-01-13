@@ -4,7 +4,7 @@ import dev.emi.trinkets.api.TrinketEnums;
 import dev.emi.trinkets.api.event.TrinketDropCallback;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainer;
 import dev.upcraft.soulbound.api.inventory.SoulboundContainerProvider;
-import dev.upcraft.soulbound.core.SoulboundHooks;
+import dev.upcraft.soulbound.SoulboundHooks;
 import dev.upcraft.soulbound.init.SoulboundContainerProviders;
 import dev.upcraft.sparkweave.api.registry.RegistrySupplier;
 import org.jetbrains.annotations.Nullable;

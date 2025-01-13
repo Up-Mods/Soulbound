@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_display_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "Up"
+  ],
+  "contributors": [
+    "TehNut"
+  ],
+  "contact": {
+    "homepage": "${homepage_url}",
+    "sources": "${sources_url}",
+    "issues": "${issues_url}"
+  },
+  "license": "${license_url}",
+  "icon": "icon.png",
+  "environment": "*",
+  "custom": {
+    "mc-publish": {
+      "curseforge": "618682",
+      "modrinth": "9QyjzbTh",
+      "dependencies": [
+        "fabric-api(required){curseforge:306612}{modrinth:P7dR8mSH}",
+        "resourcefulconfig(required){modrinth:M1953qlQ}{curseforge:714059}",
+        "sparkweave(required){modrinth:nf68xfAw}{curseforge:911456}"
+      ],
+      "loaders": [
+        "fabric",
+        "quilt"
+      ],
+      "java": [
+        "${java_version}"
+      ]
+    },
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "${discord_url}"
+      }
+    },
+    "loom:injected_interfaces": {
+    }
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": "=${minecraft_version}",
+    "java": ">=${java_version}",
+    "fabric-api": "*",
+    "resourcefulconfig": "*",
+    "sparkweave": ">=0.7.0 <0.100.0"
+  },
+  "entrypoints": {
+    "main": [
+      "dev.upcraft.soulbound.Soulbound"
+    ],
+    "client": [
+      "dev.upcraft.sparkweave.entrypoint.Client"
+    ],
+    "fabric-datagen": [
+      "dev.upcraft.soulbound.datagen.SoulboundDataGenerator"
+    ],
+    "modmenu": [
+      "dev.upcraft.soulbound.compat.modmenu.ModmenuCompat"
+    ]
+  },
+  "mixins": [
+    "${mod_id}.mixins.json"
+  ]
+}

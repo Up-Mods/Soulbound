@@ -1,8 +1,0 @@
-{
-  "enchantment.soulbound.soulbound": "Soulbound",
-  "enchantment.soulbound.soulbound.desc": "Retains items upon death",
-  "soulbound.midnightconfig.title": "Soulbound",
-  "soulbound.midnightconfig.soulboundPreservationRate": "Soulbound Enchantment Preservation Rate",
-  "soulbound.midnightconfig.soulboundDropChance": "Item Drop Chance",
-  "soulbound.midnightconfig.soulboundIsTreasureEnchantment": "Soulbound is a Treasure-Enchantment"
-}

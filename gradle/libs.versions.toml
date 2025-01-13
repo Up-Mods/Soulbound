@@ -1,19 +1,24 @@
 [versions]
 # The latest versions are available at https://lambdaurora.dev/tools/import_quilt.html
 chenille = "0.11.+"
-quilt_loom = "1.3.+"
+fabric_loom = "1.9.2"
 
 minecraft = "1.20.1"
-quilt_mappings = "1.20.1+build.23"
-quilt_loader = "0.20.2"
+fabric_loader = "0.16.10"
 
-parchment = "2023.09.03"
-emi = "1.0.19+1.20.1"
+# https://parchmentmc.org/docs/getting-started
+parchment_minecraft = "1.20.1"
+parchment_mappings = "2023.09.03"
+
+jetbrains_annotations = "26.0.1"
+
+fabric_api = "0.92.2+1.20.1"
+
+cca = "5.2.3"
+emi = "1.1.18+1.20.1"
 modmenu = "7.2.2"
-midnightlib = "1.4.1-quilt"
-lazydfu = "0.1.3"
-mixinextras = "0.2.0-rc.4"
-sparkweave = "0.3.0"
+resourceful_config = "2.1.2"
+sparkweave = "0.7.0"
 
 universal_graves = "3.0.0+1.20.1"
 sgui = "1.2.2+1.20"
@@ -26,23 +31,17 @@ fabric_permissions_api = "0.2-SNAPSHOT"
 
 trinkets = "3.7.1"
 
-quilted_fabric_api = "7.1.2+0.87.0-1.20.1"
-
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
-quilt_mappings = { module = "org.quiltmc:quilt-mappings", version.ref = "quilt_mappings" }
-parchment_mappings = { module = "org.parchmentmc.data:parchment-1.20.1", version.ref = "parchment" }
-quilt_loader = { module = "org.quiltmc:quilt-loader", version.ref = "quilt_loader" }
-mixinextras = { module = "io.github.llamalad7:mixinextras-fabric", version.ref = "mixinextras" }
-sparkweave = { module = "dev.upcraft:Sparkweave", version.ref = "sparkweave" }
+fabric_loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric_loader" }
+jetbrains_annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations" }
 
-quilted_fabric_api = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.ref = "quilted_fabric_api" }
-quilted_fabric_api_deprecated = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api-deprecated", version.ref = "quilted_fabric_api" }
+fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_api" }
 
 emi = { module = "dev.emi:emi-fabric", version.ref = "emi" }
 modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
-midnightlib = { module = "maven.modrinth:midnightlib", version.ref = "midnightlib" }
-lazydfu = { module = "maven.modrinth:lazydfu", version.ref = "lazydfu" }
+resourceful_config = { module = "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.20.1", version.ref = "resourceful_config" }
+sparkweave = { module = "dev.upcraft.sparkweave:Sparkweave-Fabric", version.ref = "sparkweave" }
 
 universal_graves = { module = "maven.modrinth:universal-graves", version.ref = "universal_graves" }
 sgui = { module = "eu.pb4:sgui", version.ref = "sgui" }
@@ -57,11 +56,8 @@ fabric_permissions_api = { module = "me.lucko:fabric-permissions-api", version.r
 
 trinkets = { module = "dev.emi:trinkets", version.ref = "trinkets" }
 
-# If you have multiple similar dependencies, you can declare a dependency bundle and reference it on the build script with "libs.bundles.example".
 [bundles]
-quilted_fabric_api = ["quilted_fabric_api", "quilted_fabric_api_deprecated"]
-universal_graves_dependencies = ["sgui", "palceholder_api", "server_translations_api", "polymer_core", "polymer_resource_pack", "polymer_virtual_entity", "predicate_api", "common_protection_api", "fabric_permissions_api"]
+universal_graves_runtime = ["universal_graves", "sgui", "palceholder_api", "server_translations_api", "polymer_core", "polymer_resource_pack", "polymer_virtual_entity", "predicate_api", "common_protection_api", "fabric_permissions_api"]
 
 [plugins]
-quilt_loom = { id = "org.quiltmc.loom", version.ref = "quilt_loom" }
-chenille = { id = "io.github.ladysnake.chenille", version.ref = "chenille" }
+fabric_loom = { id = "fabric-loom", version.ref = "fabric_loom" }
