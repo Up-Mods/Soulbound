@@ -188,11 +188,11 @@ java {
 jar {
 	from(layout.projectDirectory) {
 		include "LICENSE.md"
-		rename { "LICENSE_${project.mod_id}.md" }
+		rename "LICENSE.md", "LICENSE_${mod_id}.md"
 	}
 
 	manifest.mainAttributes(
-		"Implementation-Title": project.mod_id,
+		"Implementation-Title": mod_id,
 		"Implementation-Version": project.version,
 		"Maven-Artifact": "${project.group}:${rootProject.name}-Fabric:${project.version}",
 		"Built-On-Minecraft": libs.versions.minecraft.get(),
