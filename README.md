@@ -1,9 +1,10 @@
 # Soulbound
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Up-Mods/Soulbound/build_status.yml?label=Build%20Status&logo=GitHub&style=flat-square)](https://github.com/Up-Mods/Soulbound/actions/workflows/build_status.yml "GitHub Actions") [![Latest Release](https://img.shields.io/github/v/release/Up-Mods/Soulbound?include_prereleases&label=Latest%20Release&logo=GitHub&style=flat-square)](https://github.com/Up-Mods/Soulbound/releases/latest "GitHub Releases") [![Maven](https://img.shields.io/maven-metadata/v?label=Download%20from%20Maven&metadataUrl=https%3A%2F%2Fmaven.uuid.gg%2Freleases%2Fdev%2Fupcraft%2FSoulbound%2Fmaven-metadata.xml&style=flat-square)](https://maven.uuid.gg/#/releases/dev/upcraft/Soulbound "maven.uuid.gg")
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Up-Mods/Soulbound/build_status.yml?label=Build%20Status&logo=GitHub&style=flat-square)](https://github.com/Up-Mods/Soulbound/actions/workflows/build_status.yml "GitHub Actions") [![Latest Release](https://img.shields.io/github/v/release/Up-Mods/Soulbound?include_prereleases&label=Latest%20Release&logo=GitHub&style=flat-square)](https://github.com/Up-Mods/Soulbound/releases/latest "GitHub Releases") [![Maven](https://img.shields.io/maven-metadata/v?label=Download%20from%20Maven&metadataUrl=https%3A%2F%2Fmaven.uuid.gg%2Freleases%2Fdev%2Fupcraft%2Fsoulbound%2FSoulbound-Fabric%2Fmaven-metadata.xml&style=flat-square)](https://maven.uuid.gg/#/releases/dev/upcraft/soulbound "maven.uuid.gg")
 
-Soulbound is a mod for Minecraft that adds an enchantment for keeping items upon death. It is built for the 
-[QuiltMC](https://quiltmc.org) modding toolchain.
+Soulbound is a mod for Minecraft that adds an enchantment for keeping items upon death.
+
+
 
 ## Addons
 
@@ -22,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    modImplementation "dev.upcraft:Soulbound:${soulbound_version}"
+    modImplementation "dev.upcraft.soulbound:Soulbound-Fabric:${soulbound_version}"
 }
 ```
 
